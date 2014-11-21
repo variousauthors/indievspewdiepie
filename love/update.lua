@@ -1,24 +1,11 @@
+local function update_velocity (ship, dt, fx, fy)
+    fx = fx or 0
+    fy = fy or 0
 
-function love.update(dt)
+    local vx, vy, x, y
 
-    --Update here
-    for i, ship in pairs(game.ships) do
-    end
-
-    -- player update
-    local player = game.player
-    local fx, fy, vx, vy, x, y
-
-    fx, fy = 0, 0
-    vx, vy = player.vx, player.vy
-    x, y = player.x, player.y
-    m = player.m
-
-    -- calculate control forces
-    if game.player.up == true then fy = fy - 1000 end
-    if game.player.down == true then fy = fy + 1000 end
-    if game.player.left == true then fx = fx - 1000 end
-    if game.player.right == true then fx = fx + 1000 end
+    vx, vy = ship.vx, ship.vy
+    m = ship.m
 
     -- calculate other forces
 
@@ -27,20 +14,80 @@ function love.update(dt)
 
     -- cap the magnitude of velocity
     local square_magnitude = math.pow(vx, 2) + math.pow(vy, 2)
-    if  square_magnitude > player.square_max_speed then
+    if  square_magnitude > ship.square_max_speed then
         local theta = math.atan2(vy, vx)
-        local mag = player.max_speed
+        local mag = ship.max_speed
 
         vx = mag*math.cos(theta)
         vy = mag*math.sin(theta)
     end
 
-    print(vx, vy, math.sqrt(math.pow(vx, 2) + math.pow(vy, 2)), player.max_speed)
+    ship.vx = vx
+    ship.vy = vy
+end
 
-    player.vx = vx
-    player.vy = vy
-    player.x = x + vx*dt
-    player.y = y + vy*dt
+local function update_position (ship, dt)
+    ship.x = ship.x + ship.vx*dt
+    ship.y = ship.y + ship.vy*dt
+end
+
+-- physics
+-- momentum, p = gamma*m*v
+-- gamma = 1 / sqrt(1 - v^2 / c^2)
+--
+-- use the previous p_o to get the p_1 etc...
+--
+-- gravity drops off with 1/r^2 where r is distance to center of mass
+--
+
+function love.update (dt)
+    local player = game.player
+
+    --Update here
+    for i, ship in pairs(game.ships) do
+        -- control forces: ships fly to maintain constant distance from player
+        local dx, dy = ship.x - player.x, ship.y - player.y
+        local square_distance = math.pow(dx, 2) + math.pow(dy, 2)
+        local fx, fy
+
+        if not (square_distance < ship.square_target_radius + 1000 and ship.square_target_radius - 1000 < square_distance) then
+            ship.orbiting = false
+            -- the distance is positive, then the force must be negative
+            fx = -dx
+            fy = -dy
+        else
+            if orbiting == false then
+                -- choose an orbit direction
+                if ship.vx > ship.vy then
+                    fy = 1000
+                elseif ship.vy > ship.vx then
+                    fx = 1000
+                else
+                    print("IMPOSSIBLE!")
+                end
+
+                ship.orbiting = true
+            end
+        end
+
+        update_velocity(ship, dt, fx, fy)
+        update_position(ship, dt)
+    end
+
+    -- calculate control forces
+    local fx, fy = 0, 0
+
+    if player.up == true then fy = fy - 1000 end
+    if player.down == true then fy = fy + 1000 end
+    if player.left == true then fx = fx - 1000 end
+    if player.right == true then fx = fx + 1000 end
+
+    update_velocity(player, dt, fx, fy)
+    update_position(player, dt)
+
+    print(player.vx, player.vy)
+
+    -- player update
 
     -- camera update
     local cx = love.viewport.getWidth() / 2

@@ -4,7 +4,7 @@ function love.draw()
     local player = game.player
 
     -- translate everything so the camera is centered on the player
-    --love.graphics.translate(game.camera.x, game.camera.y)
+    love.graphics.translate(game.camera.x, game.camera.y)
 
     love.graphics.setColor(255, 255, 255)
     love.graphics.circle('fill', player.x, player.y, 10)
