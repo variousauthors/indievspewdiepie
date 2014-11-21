@@ -1,29 +1,38 @@
 
 function love.update(dt)
-    local player = game.player
-    local fx, fy, vx, vy, x, y
 
     --Update here
     for i, ship in pairs(game.ships) do
-        ship_update(ship, dt)
     end
 
     -- player update
+    local player = game.player
+    local fx, fy, vx, vy, x, y
+
     fx, fy = 0, 0
     vx, vy = player.vx, player.vy
     x, y = player.x, player.y
     m = player.m
 
+    -- calculate control forces
     if game.player.up == true then fy = fy - 1000 end
     if game.player.down == true then fy = fy + 1000 end
     if game.player.left == true then fx = fx - 1000 end
     if game.player.right == true then fx = fx + 1000 end
 
+    -- calculate other forces
+
     -- F = ma
     vx, vy = vx + (fx/m)*dt, vy + (fy/m)*dt
 
     -- cap the magnitude of velocity
-    if math.pow(vx, 2) + math.pow(vy, 2) > math.pow(player.max_speed, 2) then
+    local square_magnitude = math.pow(vx, 2) + math.pow(vy, 2)
+    if  square_magnitude > player.square_max_speed then
+        local theta = math.atan2(vy, vx)
+        local mag = player.max_speed
+
+        vx = mag*math.cos(theta)
+        vy = mag*math.sin(theta)
     end
 
     print(vx, vy, math.sqrt(math.pow(vx, 2) + math.pow(vy, 2)), player.max_speed)
