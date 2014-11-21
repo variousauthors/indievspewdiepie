@@ -1,4 +1,4 @@
-# LÖVE2D Boilerplate
+# Made with @nomoon's LÖVE2D Boilerplate
 
 A project structure for LÖVE2D with a bunch of helpful libraries.
 
