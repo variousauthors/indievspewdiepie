@@ -49,6 +49,7 @@ table.copy = table.deepcopy
 -- This table can store important "global" objects for the game
 -- (and keep the global namespace cleaner)
 game = {
+    ships = {},
     states = {},
     objects = {},
     graphics = {} -- Just some ideas...

@@ -7,6 +7,9 @@ love.inputman = require('libs/inputman').newSingleton()
 function love.inputpressed(state)
     love.debug.printIf('input', 'pressed:', state)
 
+    -- player inputpressed
+    game.player[state] = true
+
     -- An example of input/sound
     if(state == 'select') then love.soundman.run('select') end
 end
@@ -14,6 +17,8 @@ end
 function love.inputreleased(state)
     love.debug.printIf('input', 'released:', state)
 
+    -- player inputreleased
+    game.player[state] = false
 end
 
 -- Maybe we want to use keypressed as well for a few global
