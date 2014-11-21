@@ -19,6 +19,10 @@ local function Ship (x, y, m, max, r)
     return ship
 end
 
+-- import image assets
+game.star_field = love.graphics.newImage('assets/star_field.png')
+
+-- create game objects
 game.player = Ship(0, 0, 2, some_max)
 game.player.up = false
 game.player.down = false
