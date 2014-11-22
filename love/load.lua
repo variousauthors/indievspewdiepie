@@ -47,6 +47,8 @@ function love.load()
         charge = 4
     }
 
+    game.active_asteroids = {}
+
     game.ships = { }
     game.wings = {} -- collections of ships that flock
 
@@ -58,6 +60,6 @@ function love.load()
         y = 0
     }
 
-    love.viewport.setFullscreen()
-    love.viewport.setupScreen()
+--  love.viewport.setFullscreen()
+--  love.viewport.setupScreen()
 end

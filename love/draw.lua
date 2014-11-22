@@ -39,35 +39,65 @@ local function drawStars (xoff, yoff, starscale)
             local ii, jj = math.floor(i / size), math.floor(j / size)
             local hash = mix(STAR_SEED, ii, jj)
 
-            -- populate with 3 stars
-            for n = 0, 2 do
-                local px = (hash % size) + (i - xoff);
-                hash = rshift(hash, 3)
-
-                local py = (hash % size) + (j - yoff);
-                hash = rshift(hash, 3)
-
-                love.graphics.point(px - x_lerp, py - y_lerp)
-            end
+            local populate = 1
 
             -- in the foreground
             if starscale == 1 then
                 -- if this is in a strip of the belt
                 local distance = math.sqrt(math.pow(ii, 2) + math.pow(jj, 2))
                 if distance % 5 < 2 then
-                    for n = 0, 2 do
-                        local px = (hash % size) + (i - xoff);
-                        hash = rshift(hash, 3)
+                    populate = 2
+                end
+            end
 
-                        local py = (hash % size) + (j - yoff);
-                        hash = rshift(hash, 3)
+            if populate == 1 then
+                -- populate with 3 stars
+                for n = 0, 2 do
+                    local px = (hash % size) + (i - xoff);
+                    hash = rshift(hash, 3)
 
-                        love.graphics.setColor(255, 0, 0)
-                        love.graphics.print("asteroids", i -xoff, j -yoff)
-                        love.graphics.setColor(r, g, b)
+                    local py = (hash % size) + (j - yoff);
+                    hash = rshift(hash, 3)
 
-                        love.graphics.rectangle('fill', px - x_lerp, py - y_lerp, 100, 100)
+                    love.graphics.point(px - x_lerp, py - y_lerp)
+                end
+            elseif populate == 2 then
+                -- populate with 3 asteroids
+                for n = 0, 2 do
+                    local px = (hash % size) + (i - xoff);
+                    hash = rshift(hash, 3)
+
+                    local py = (hash % size) + (j - yoff);
+                    hash = rshift(hash, 3)
+
+                    local r = size/4
+                    hash = rshift(hash, 3)
+
+                    love.graphics.setColor(255, 0, 0)
+                    love.graphics.print("asteroids", i -xoff, j -yoff)
+                    love.graphics.setColor(r, g, b)
+
+                    local verts = {}
+                    local theta = 0
+                    local num_verts = 5 + (hash % 3) + (hash % 5) + (hash % 7)
+                    local arc_size = 2*math.pi/num_verts
+
+                    for i = 1, num_verts do
+                        -- use arithmetic shift so that we don't run out of numbers
+
+                        theta = (i - 1) * arc_size
+                        theta = theta + (hash % arc_size)
+
+                        -- we want angles around the circle
+                        local vx = r*math.cos(theta)
+                        local vy = r*math.sin(theta)
+
+                        table.insert(verts, px + vx - x_lerp)
+                        table.insert(verts, py + vy - y_lerp)
+
                     end
+
+                    table.insert(game.active_asteroids, verts)
                 end
             end
         end
@@ -86,10 +116,16 @@ function love.draw()
     love.graphics.setColor(100, 100, 100)
     drawStars(- game.camera.x/8, - game.camera.y/8, 9)
 
+    for i, rock in pairs(game.active_asteroids) do
+        love.graphics.polygon('fill', rock)
+    end
+
+    -- empty the asteroid data for next run
+    game.active_asteroids = {}
+
     love.graphics.push()
     -- translate everything so the camera is centered on the player
     love.graphics.translate(game.camera.x, game.camera.y)
-
 
     if player.explode ~= true then
         love.graphics.setColor(255, 255, 255)
