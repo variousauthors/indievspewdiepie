@@ -20,7 +20,7 @@ local function mix (a, b, c)
 end
 
 local strip_stagger = 500
-local function defineStars (xoff, yoff, starscale)
+local function lookUpStars (xoff, yoff, starscale)
     local size = STAR_TILE_SIZE / starscale
     local w, h = love.viewport.getWidth(), love.viewport.getHeight()
 
@@ -75,7 +75,8 @@ local function defineStars (xoff, yoff, starscale)
                     local r = size/4
                     hash = rshift(hash, 3)
 
-                    local verts = {}
+                    local rock = { verts = {}, x = px, y = py, r = r }
+
                     local theta = 0
                     local num_verts = 5 + (hash % 3) + (hash % 5) + (hash % 7)
                     local arc_size = 2*math.pi/num_verts
@@ -90,13 +91,12 @@ local function defineStars (xoff, yoff, starscale)
                         local vx = r*math.cos(theta)
                         local vy = r*math.sin(theta)
 
-                        table.insert(verts, px + vx - x_lerp)
-                        table.insert(verts, py + vy - y_lerp)
-
+                        table.insert(rock.verts, px + vx - x_lerp)
+                        table.insert(rock.verts, py + vy - y_lerp)
                     end
 
                     -- reach out to the global and define asteroids
-                    table.insert(game.active_asteroids, verts)
+                    table.insert(game.active_asteroids, rock)
                 end
             end
         end
@@ -152,11 +152,55 @@ end
 function love.update (dt)
     local player = game.player
 
+    -- collide rocks with every other table
+    for i, rock in pairs(game.active_asteroids) do
+        -- if distance from rock center to object center overwhelms rock's r
+        -- then explode object
+
+        -- collide with player
+
+        -- collide with ships
+        for i, ship in pairs(game.ships) do
+        end
+
+        for i = #(game.enemy_bullets), 1, -1 do
+            local bullet = game.enemy_bullets[i]
+
+            -- if the bullet has struck the player, explode
+            -- control forces: ships fly to maintain constant distance from player
+            local dx, dy = bullet.x - rock.x, bullet.y - rock.y
+            local square_distance = math.pow(dx, 2) + math.pow(dy, 2)
+
+            -- explode the player if the ship has collided
+            if square_distance < math.pow(rock.r, 2) then
+                bullet.explode = true
+                table.remove(game.enemy_bullets, i)
+            end
+        end
+
+
+        for i = #(game.player_bullets), 1, -1 do
+            local bullet = game.player_bullets[i]
+
+            -- if the bullet has struck the player, explode
+            -- control forces: ships fly to maintain constant distance from player
+            local dx, dy = bullet.x - rock.x, bullet.y - rock.y
+            local square_distance = math.pow(dx, 2) + math.pow(dy, 2)
+
+            -- explode the player if the ship has collided
+            if square_distance < math.pow(rock.r, 2) then
+                bullet.explode = true
+                table.remove(game.player_bullets, i)
+            end
+        end
+    end
+
     -- player should check for other ships
     -- player should check for bullets
     -- every ship should check for player bullets
 
-    --Update here
+    -- enemy update
+    -- update velocity, collide with player, TODO collide with rocks
     for i, ship in pairs(game.ships) do
         local fx, fy = 0, 0
 
@@ -235,6 +279,7 @@ function love.update (dt)
     end
 
     -- enemy bullet update: explore the table backward
+    -- collide bullets with player, TODO collide with rocks
     for i = #(game.enemy_bullets), 1, -1 do
         local bullet = game.enemy_bullets[i]
 
@@ -254,51 +299,55 @@ function love.update (dt)
 
     -- player update
     -- calculate control forces
-    local fx, fy = 0, 0
+    -- TODO collide with rocks
+    do
+        local fx, fy = 0, 0
 
-    if player.explode ~= true then
-        if player.up == true then fy = fy - 1000 end
-        if player.down == true then fy = fy + 1000 end
-        if player.left == true then fx = fx - 1000 end
-        if player.right == true then fx = fx + 1000 end
+        if player.explode ~= true then
+            if player.up == true then fy = fy - 1000 end
+            if player.down == true then fy = fy + 1000 end
+            if player.left == true then fx = fx - 1000 end
+            if player.right == true then fx = fx + 1000 end
 
-        -- update the reticle
-        local mx, my = love.mouse.getPosition()
-        local h = love.viewport.getHeight()/2
-        local w = love.viewport.getWidth()/2
+            -- update the reticle
+            local mx, my = love.mouse.getPosition()
+            local h = love.viewport.getHeight()/2
+            local w = love.viewport.getWidth()/2
 
-        local rx, ry = mx - w, my - h
-        local theta = math.atan2(ry, rx)
+            local rx, ry = mx - w, my - h
+            local theta = math.atan2(ry, rx)
 
-        player.reticle.theta = theta
-        player.reticle.rx = 100*math.cos(theta) + w
-        player.reticle.ry = 100*math.sin(theta) + h
+            player.reticle.theta = theta
+            player.reticle.rx = 100*math.cos(theta) + w
+            player.reticle.ry = 100*math.sin(theta) + h
 
-        player.charge = math.min(1.5, player.charge + dt)
-        if player.charge > 1 then
-            if player.gun == true then
-                player.gun = false
-                local bullet = {
-                    x = player.x, y = player.y, speed = 200, r = 3
-                }
+            player.charge = math.min(1.5, player.charge + dt)
+            if player.charge > 1 then
+                if player.gun == true then
+                    player.gun = false
+                    local bullet = {
+                        x = player.x, y = player.y, speed = 200, r = 3
+                    }
 
-                local theta = player.reticle.theta
-                local mag = bullet.speed
+                    local theta = player.reticle.theta
+                    local mag = bullet.speed
 
-                bullet.vx = mag*math.cos(theta) + player.vx
-                bullet.vy = mag*math.sin(theta) + player.vy
+                    bullet.vx = mag*math.cos(theta) + player.vx
+                    bullet.vy = mag*math.sin(theta) + player.vy
 
-                table.insert(game.player_bullets, bullet)
+                    table.insert(game.player_bullets, bullet)
 
-                player.charge = player.charge - 1/3
+                    player.charge = player.charge - 1/3
+                end
             end
         end
+
+        update_velocity(player, dt, fx, fy)
+        update_position(player, dt)
     end
 
-    update_velocity(player, dt, fx, fy)
-    update_position(player, dt)
-
     -- player bullet update: explore the table backward
+    -- collide with enemy, TODO collide with rocks
     for i = #(game.player_bullets), 1, -1 do
         local bullet = game.player_bullets[i]
 
@@ -360,7 +409,7 @@ function love.update (dt)
 
     -- passing in negative camera offset so that the stars appear
     -- to travel in the opposite direction to the camera
-    table.insert(game.star_layers, defineStars(- game.camera.x, - game.camera.y, 1))
-    table.insert(game.star_layers, defineStars(- game.camera.x/4, - game.camera.y/4, 3))
-    table.insert(game.star_layers, defineStars(- game.camera.x/8, - game.camera.y/8, 9))
+    table.insert(game.star_layers, lookUpStars(- game.camera.x, - game.camera.y, 1))
+    table.insert(game.star_layers, lookUpStars(- game.camera.x/4, - game.camera.y/4, 3))
+    table.insert(game.star_layers, lookUpStars(- game.camera.x/8, - game.camera.y/8, 9))
 end

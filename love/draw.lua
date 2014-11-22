@@ -10,7 +10,7 @@ function love.draw()
     end
 
     for i, rock in pairs(game.active_asteroids) do
-        love.graphics.polygon('fill', rock)
+        love.graphics.polygon('fill', rock.verts)
     end
 
     -- empty the asteroid data for next run
