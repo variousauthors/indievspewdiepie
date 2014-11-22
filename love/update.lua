@@ -85,8 +85,6 @@ function love.update (dt)
     update_velocity(player, dt, fx, fy)
     update_position(player, dt)
 
-    print(player.vx, player.vy)
-
     -- player update
 
     -- camera update
