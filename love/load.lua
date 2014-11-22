@@ -49,6 +49,7 @@ function love.load()
 
     game.active_asteroids = {}
     game.star_layers = {}
+    game.explosions = {}
 
     game.ships = { }
     game.wings = {} -- collections of ships that flock

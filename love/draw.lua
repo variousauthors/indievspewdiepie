@@ -3,6 +3,7 @@ love.viewport = require('libs/viewport').newSingleton()
 function love.draw()
     local player = game.player
 
+    -- TODO for some reason stars exist in their own coordinate space?
     for i, star_layer in pairs(game.star_layers) do
         for j, star in pairs(star_layer) do
             love.graphics.point(star.x, star.y)
@@ -14,8 +15,6 @@ function love.draw()
     end
 
     -- empty the asteroid data for next run
-    game.active_asteroids = {}
-    game.star_layers = {}
 
     love.graphics.push()
     -- translate everything so the camera is centered on the player
@@ -54,6 +53,25 @@ function love.draw()
         love.graphics.setColor(255, 100, 0)
         love.graphics.circle('fill', bullet.x, bullet.y, bullet.r)
     end
+
+    for i = #(game.explosions), 1, -1 do
+        local explosion = game.explosions[i]
+
+        if not explosion.explode then
+            explosion.explode = 3
+        else
+            explosion.explode = explosion.explode - 1
+        end
+
+        if explosion.explode < 0 then
+            table.remove(game.explosions, i)
+        else
+            -- explosion should be bigger than whatever was exploding
+            love.graphics.setColor(255, 0, 0)
+            love.graphics.circle('fill', explosion.x, explosion.y, explosion.r * 3)
+        end
+    end
+
 
     love.graphics.pop()
 

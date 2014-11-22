@@ -75,7 +75,17 @@ local function lookUpStars (xoff, yoff, starscale)
                     local r = size/4
                     hash = rshift(hash, 3)
 
-                    local rock = { verts = {}, x = px, y = py, r = r }
+                    local rock = {
+                        verts = {},
+                        x = px - x_lerp,
+                        y = py - y_lerp,
+                        -- was lost, and totally just GUESSED that I needed game.camera here
+                        -- TODO I need to rewrite this whole thing so that the coords coming out
+                        -- are in the same space as all other game objects, WITHOUT this bullshit here
+                        sx = px - x_lerp - game.camera.x,
+                        sy = py - y_lerp - game.camera.y,
+                        r = r
+                    }
 
                     local theta = 0
                     local num_verts = 5 + (hash % 3) + (hash % 5) + (hash % 7)
@@ -91,8 +101,8 @@ local function lookUpStars (xoff, yoff, starscale)
                         local vx = r*math.cos(theta)
                         local vy = r*math.sin(theta)
 
-                        table.insert(rock.verts, px + vx - x_lerp)
-                        table.insert(rock.verts, py + vy - y_lerp)
+                        table.insert(rock.verts, rock.x + vx)
+                        table.insert(rock.verts, rock.y + vy)
                     end
 
                     -- reach out to the global and define asteroids
@@ -168,29 +178,30 @@ function love.update (dt)
 
             -- if the bullet has struck the player, explode
             -- control forces: ships fly to maintain constant distance from player
-            local dx, dy = bullet.x - rock.x, bullet.y - rock.y
+            local dx, dy = bullet.x - rock.sx, bullet.y - rock.sy
             local square_distance = math.pow(dx, 2) + math.pow(dy, 2)
 
             -- explode the player if the ship has collided
             if square_distance < math.pow(rock.r, 2) then
-                bullet.explode = true
+                bullet.explode = 3
                 table.remove(game.enemy_bullets, i)
+                table.insert(game.explosions, bullet)
             end
         end
-
 
         for i = #(game.player_bullets), 1, -1 do
             local bullet = game.player_bullets[i]
 
             -- if the bullet has struck the player, explode
             -- control forces: ships fly to maintain constant distance from player
-            local dx, dy = bullet.x - rock.x, bullet.y - rock.y
+            local dx, dy = bullet.x - rock.sx, bullet.y - rock.sy
             local square_distance = math.pow(dx, 2) + math.pow(dy, 2)
 
             -- explode the player if the ship has collided
             if square_distance < math.pow(rock.r, 2) then
-                bullet.explode = true
+                bullet.explode = 3
                 table.remove(game.player_bullets, i)
+                table.insert(game.explosions, bullet)
             end
         end
     end
@@ -406,6 +417,8 @@ function love.update (dt)
     game.camera.y = cy - py
 
     -- generate stars and asteroids for the currently active space
+    game.star_layers = {}
+    game.active_asteroids = {}
 
     -- passing in negative camera offset so that the stars appear
     -- to travel in the opposite direction to the camera
