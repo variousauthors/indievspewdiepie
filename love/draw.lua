@@ -21,11 +21,9 @@ local function mix (a, b, c)
     return c
 end
 
---[[
---
---
---]]
+local strip_stagger = 500
 local function drawStars (xoff, yoff, starscale)
+    local r, g, b = love.graphics.getColor()
     local size = STAR_TILE_SIZE / starscale
     local w, h = love.viewport.getWidth(), love.viewport.getHeight()
 
@@ -38,16 +36,39 @@ local function drawStars (xoff, yoff, starscale)
         for j = sy, h + sy + size*3, size do
             -- each square in the lattice is indexed uniquely
             -- so that it produces a unique hash
-            local hash = mix(STAR_SEED, math.floor(i / size), math.floor(j / size))
+            local ii, jj = math.floor(i / size), math.floor(j / size)
+            local hash = mix(STAR_SEED, ii, jj)
 
+            -- populate with 3 stars
             for n = 0, 2 do
                 local px = (hash % size) + (i - xoff);
-                hash = arshift(hash, 3)
+                hash = rshift(hash, 3)
 
                 local py = (hash % size) + (j - yoff);
-                hash = arshift(hash, 3)
+                hash = rshift(hash, 3)
 
                 love.graphics.point(px - x_lerp, py - y_lerp)
+            end
+
+            -- in the foreground
+            if starscale == 1 then
+                -- if this is in a strip of the belt
+                local distance = math.sqrt(math.pow(ii, 2) + math.pow(jj, 2))
+                if distance % 5 < 2 then
+                    for n = 0, 2 do
+                        local px = (hash % size) + (i - xoff);
+                        hash = rshift(hash, 3)
+
+                        local py = (hash % size) + (j - yoff);
+                        hash = rshift(hash, 3)
+
+                        love.graphics.setColor(255, 0, 0)
+                        love.graphics.print("asteroids", i -xoff, j -yoff)
+                        love.graphics.setColor(r, g, b)
+
+                        love.graphics.rectangle('fill', px - x_lerp, py - y_lerp, 100, 100)
+                    end
+                end
             end
         end
     end
@@ -56,6 +77,8 @@ end
 function love.draw()
     local player = game.player
 
+    -- passing in negative camera offset so that the stars appear
+    -- to travel in the opposite direction to the camera
     love.graphics.setColor(255, 255, 255)
     drawStars(- game.camera.x, - game.camera.y, 1)
     love.graphics.setColor(200, 200, 200)
