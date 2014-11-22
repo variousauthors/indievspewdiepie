@@ -70,6 +70,7 @@ function love.update (dt)
             else
                 if orbiting == false then
                     -- choose an orbit direction
+                    -- TODO should just be tangent to the player, in either direction
                     if ship.vx > ship.vy then
                         fy = 1000
                     elseif ship.vy > ship.vx then
@@ -81,12 +82,48 @@ function love.update (dt)
                     ship.orbiting = true
                 end
             end
+
+            update_velocity(ship, dt, fx, fy)
+            update_position(ship, dt)
+
+            -- shoot at the player! bullets have a constant velocity + the velocity of the ship
+            ship.charge = ship.charge + dt
+            if ship.charge > 1 then
+                local bullet = {
+                    x = ship.x, y = ship.y, speed = 100
+                }
+
+                -- get the distance to the player
+                local dx = ship.x - player.x
+                local dy = ship.y - player.y
+                local distance = math.sqrt(math.pow(dx, 2) + math.pow(dy, 2))
+
+                -- divide by dt to see how many steps are between
+                local hit_time = (distance/bullet.speed) -- in seconds
+
+                -- predict the player's movement forward by that many steps
+                local future_x = player.x + player.vx*hit_time
+                local future_y = player.y + player.vy*hit_time
+
+                -- determine the vector to that spot
+                local theta = math.atan2(ship.y - future_y, ship.x - future_x)
+                local mag = bullet.speed + math.sqrt(math.pow(ship.vx, 2) + math.pow(ship.vy, 2))
+
+                bullet.vx = -mag*math.cos(theta)
+                bullet.vy = -mag*math.sin(theta)
+
+                table.insert(game.enemy_bullets, bullet)
+
+                ship.charge = ship.charge - (1 + math.random())
+            end
+        else
+            update_velocity(ship, dt, fx, fy)
+            update_position(ship, dt)
         end
 
-        update_velocity(ship, dt, fx, fy)
-        update_position(ship, dt)
     end
 
+    -- player update
     -- calculate control forces
     local fx, fy = 0, 0
 
@@ -100,7 +137,42 @@ function love.update (dt)
     update_velocity(player, dt, fx, fy)
     update_position(player, dt)
 
-    -- player update
+    -- bullet update: explore the table backward
+    for i = #(game.enemy_bullets), 1, -1 do
+        local bullet = game.enemy_bullets[i]
+
+        -- if the bullet has struck the player, explode
+        -- control forces: ships fly to maintain constant distance from player
+        local dx, dy = bullet.x - player.x, bullet.y - player.y
+        local square_distance = math.pow(dx, 2) + math.pow(dy, 2)
+
+        -- explode the player if the ship has collided
+        if square_distance < math.pow(player.r, 2) then
+            player.explode = true
+            table.remove(game.enemy_bullets, i)
+        end
+
+        update_position(bullet, dt)
+    end
+
+    -- TODO when should we remove bullets? Maybe there needs to be debris to
+    -- soak them up?
+
+    -- mother ship update
+    -- launches ships
+    local mom = game.mother_ship
+
+    mom.charge = mom.charge + dt
+    if mom.charge > 5 then
+        for i = 1, math.floor(math.random() * 10) do
+            local theta = math.random(0, 2*math.pi)
+            local x = mom.x + 100*math.cos(theta)
+            local y = mom.y + 100*math.sin(theta)
+            table.insert(game.ships, Ship(x, y, 3, 10, 200, 100))
+        end
+
+        mom.charge = mom.charge - (5 + math.random())
+    end
 
     -- camera update
     local cx = love.viewport.getWidth() / 2

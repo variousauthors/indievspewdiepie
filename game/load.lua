@@ -2,7 +2,7 @@ love.debug.setFlag("input")
 
 local some_max = 200
 
-local function Ship (x, y, m, r, max, gold)
+function Ship (x, y, m, r, max, gold)
     local ship = {
         x = x,
         y = y,
@@ -12,7 +12,8 @@ local function Ship (x, y, m, r, max, gold)
         r = r,
         max_speed = max,
         square_max_speed = math.pow(max, 2),
-        target_radius = gold
+        target_radius = gold,
+        charge = 0
     }
 
     if gold ~= nil then ship.square_target_radius = math.pow(gold, 2) end
@@ -30,11 +31,15 @@ game.player.down = false
 game.player.left = false
 game.player.right = false
 
-game.ships = {
-    Ship(100, 100, 3, 10, some_max, 100),
-    Ship(200, 200, 3, 10, some_max, 100),
-    Ship(-100, 100, 3, 10, some_max, 100)
+game.boss = { }
+game.mother_ship = {
+    x = 0, y = 0,
+    charge = 4
 }
+
+game.ships = { }
+
+game.enemy_bullets = {}
 
 game.camera = {
     x = 0,

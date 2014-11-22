@@ -92,5 +92,10 @@ function love.draw()
         end
     end
 
+    for i, bullet in pairs(game.enemy_bullets) do
+        love.graphics.setColor(0, 255, 255)
+        love.graphics.circle('fill', bullet.x, bullet.y, 3)
+    end
+
     love.graphics.pop()
 end
