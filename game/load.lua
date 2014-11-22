@@ -38,6 +38,7 @@ game.mother_ship = {
 }
 
 game.ships = { }
+game.wings = {} -- collections of ships that flock
 
 game.enemy_bullets = {}
 

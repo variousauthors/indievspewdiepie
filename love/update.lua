@@ -13,6 +13,8 @@ local function update_velocity (ship, dt, fx, fy)
     vx, vy = vx + (fx/m)*dt, vy + (fy/m)*dt
 
     -- cap the magnitude of velocity
+    -- TODO I want to clamp the magnitude before external forces like
+    -- gravity, but after controls and engines
     local square_magnitude = math.pow(vx, 2) + math.pow(vy, 2)
     if  square_magnitude > ship.square_max_speed then
         local theta = math.atan2(vy, vx)
@@ -49,11 +51,11 @@ function love.update (dt)
 
     --Update here
     for i, ship in pairs(game.ships) do
+        local fx, fy = 0, 0
 
         -- control forces: ships fly to maintain constant distance from player
         local dx, dy = ship.x - player.x, ship.y - player.y
         local square_distance = math.pow(dx, 2) + math.pow(dy, 2)
-        local fx, fy
 
         -- explode the player if the ship has collided
         if square_distance < math.pow(ship.r + player.r, 2) then
@@ -62,6 +64,8 @@ function love.update (dt)
         end
 
         if ship.explode ~= true then
+
+            -- ships try to stay in an orbit around the player, within the goldylocks zone
             if not (square_distance < ship.square_target_radius + 1000 and ship.square_target_radius - 1000 < square_distance) then
                 ship.orbiting = false
                 -- the distance is positive, then the force must be negative
@@ -82,6 +86,37 @@ function love.update (dt)
                     ship.orbiting = true
                 end
             end
+
+            -- TODO shelfing the flocking for now
+            -- the idea here is that I want them to move as groups,
+            -- and not collide with each-other within the groups
+            -- and then have the group move in the form described above
+            --[[
+            -- they also try to avoid colliding with their wing
+            local wing = game.wings[ship.wing]
+            local wx, wy, rx, ry = 0, 0, 0, 0
+            for i, wing_mate in pairs(wing) do
+
+                if not wing_mate.explode == true then
+                    wx = wx + (ship.x - wing_mate.x)
+                    wy = wy + (ship.y - wing_mate.y)
+
+                    rx = rx + wing_mate.x
+                    ry = ry + wing_mate.y
+                end
+            end
+
+            -- keep it together
+            wx = -(wx/(#wing))
+            wy = -(wy/(#wing))
+
+            -- but not too close?
+            rx = (wx/(#wing))
+            ry = (wy/(#wing))
+
+            fx = fx + wx + 100/rx
+            fy = fy + wy + 100/ry
+            --]]
 
             update_velocity(ship, dt, fx, fy)
             update_position(ship, dt)
@@ -164,12 +199,22 @@ function love.update (dt)
 
     mom.charge = mom.charge + dt
     if mom.charge > 5 then
-        for i = 1, math.floor(math.random() * 10) do
+        local wing = {}
+
+        for i = 1, math.floor(math.random() * 5) do
             local theta = math.random(0, 2*math.pi)
             local x = mom.x + 100*math.cos(theta)
             local y = mom.y + 100*math.sin(theta)
-            table.insert(game.ships, Ship(x, y, 3, 10, 200, 100))
+
+            local ship = Ship(x, y, 3, 10, 200, 100)
+
+            table.insert(wing, ship)
+            ship.wing = #(game.wings) + 1
+
+            table.insert(game.ships, ship)
         end
+
+        table.insert(game.wings, wing)
 
         mom.charge = mom.charge - (5 + math.random())
     end
