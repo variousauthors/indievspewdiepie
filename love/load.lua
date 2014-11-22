@@ -39,7 +39,7 @@ function love.load()
     game.player.left = false
     game.player.right = false
 
-    game.player.reticle = { }
+    game.player.reticle = { r = 5 }
 
     game.boss = { }
     game.mother_ship = {
@@ -57,4 +57,7 @@ function love.load()
         x = 0,
         y = 0
     }
+
+    love.viewport.setFullscreen()
+    love.viewport.setupScreen()
 end

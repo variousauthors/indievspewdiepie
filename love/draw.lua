@@ -94,12 +94,12 @@ function love.draw()
 
     for i, bullet in pairs(game.enemy_bullets) do
         love.graphics.setColor(0, 255, 255)
-        love.graphics.circle('fill', bullet.x, bullet.y, 3)
+        love.graphics.circle('fill', bullet.x, bullet.y, bullet.r)
     end
 
     for i, bullet in pairs(game.player_bullets) do
         love.graphics.setColor(255, 100, 0)
-        love.graphics.circle('fill', bullet.x, bullet.y, 3)
+        love.graphics.circle('fill', bullet.x, bullet.y, bullet.r)
     end
 
     love.graphics.pop()
@@ -108,8 +108,8 @@ function love.draw()
     local mx, my = love.mouse.getPosition()
 
     love.graphics.setColor(255, 0, 0)
-    love.graphics.circle('line', player.reticle.rx, player.reticle.ry, 5)
-    love.graphics.circle('fill', mx, my, 5)
+    love.graphics.circle('line', player.reticle.rx, player.reticle.ry, player.reticle.r)
+    love.graphics.circle('fill', mx, my, player.reticle.r)
     love.graphics.setColor(255, 255, 255)
 
 end
