@@ -168,20 +168,31 @@ function love.update (dt)
         -- then explode object
 
         -- collide with player
+        do
+            local dx, dy = player.x - rock.sx, player.y - rock.sy
+            local square_distance = math.pow(dx, 2) + math.pow(dy, 2)
+
+            if square_distance < math.pow(rock.r, 2) then
+                player.explode = true
+            end
+        end
 
         -- collide with ships
         for i, ship in pairs(game.ships) do
+            local dx, dy = ship.x - rock.sx, ship.y - rock.sy
+            local square_distance = math.pow(dx, 2) + math.pow(dy, 2)
+
+            if square_distance < math.pow(rock.r, 2) then
+                ship.explode = true
+            end
         end
 
         for i = #(game.enemy_bullets), 1, -1 do
             local bullet = game.enemy_bullets[i]
 
-            -- if the bullet has struck the player, explode
-            -- control forces: ships fly to maintain constant distance from player
             local dx, dy = bullet.x - rock.sx, bullet.y - rock.sy
             local square_distance = math.pow(dx, 2) + math.pow(dy, 2)
 
-            -- explode the player if the ship has collided
             if square_distance < math.pow(rock.r, 2) then
                 bullet.explode = 3
                 table.remove(game.enemy_bullets, i)
