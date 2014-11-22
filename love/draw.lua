@@ -97,20 +97,18 @@ function love.draw()
         love.graphics.circle('fill', bullet.x, bullet.y, 3)
     end
 
+    for i, bullet in pairs(game.player_bullets) do
+        love.graphics.setColor(255, 100, 0)
+        love.graphics.circle('fill', bullet.x, bullet.y, 3)
+    end
+
     love.graphics.pop()
 
     -- draw the reticle
     local mx, my = love.mouse.getPosition()
-    local h = love.viewport.getHeight()/2
-    local w = love.viewport.getWidth()/2
-
-    local bx, by = mx - w, my - h
-    local theta = math.atan2(by, bx)
-    bx = 100*math.cos(theta)
-    by = 100*math.sin(theta)
 
     love.graphics.setColor(255, 0, 0)
-    love.graphics.circle('line', w + bx, h + by, 5)
+    love.graphics.circle('line', player.reticle.rx, player.reticle.ry, 5)
     love.graphics.circle('fill', mx, my, 5)
     love.graphics.setColor(255, 255, 255)
 

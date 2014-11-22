@@ -87,37 +87,6 @@ function love.update (dt)
                 end
             end
 
-            -- TODO shelfing the flocking for now
-            -- the idea here is that I want them to move as groups,
-            -- and not collide with each-other within the groups
-            -- and then have the group move in the form described above
-            --[[
-            -- they also try to avoid colliding with their wing
-            local wing = game.wings[ship.wing]
-            local wx, wy, rx, ry = 0, 0, 0, 0
-            for i, wing_mate in pairs(wing) do
-
-                if not wing_mate.explode == true then
-                    wx = wx + (ship.x - wing_mate.x)
-                    wy = wy + (ship.y - wing_mate.y)
-
-                    rx = rx + wing_mate.x
-                    ry = ry + wing_mate.y
-                end
-            end
-
-            -- keep it together
-            wx = -(wx/(#wing))
-            wy = -(wy/(#wing))
-
-            -- but not too close?
-            rx = (wx/(#wing))
-            ry = (wy/(#wing))
-
-            fx = fx + wx + 100/rx
-            fy = fy + wy + 100/ry
-            --]]
-
             update_velocity(ship, dt, fx, fy)
             update_position(ship, dt)
 
@@ -125,7 +94,7 @@ function love.update (dt)
             ship.charge = ship.charge + dt
             if ship.charge > 1 then
                 local bullet = {
-                    x = ship.x, y = ship.y, speed = 100
+                    x = ship.x, y = ship.y, speed = 200
                 }
 
                 -- get the distance to the player
@@ -155,24 +124,9 @@ function love.update (dt)
             update_velocity(ship, dt, fx, fy)
             update_position(ship, dt)
         end
-
     end
 
-    -- player update
-    -- calculate control forces
-    local fx, fy = 0, 0
-
-    if player.explode ~= true then
-        if player.up == true then fy = fy - 1000 end
-        if player.down == true then fy = fy + 1000 end
-        if player.left == true then fx = fx - 1000 end
-        if player.right == true then fx = fx + 1000 end
-    end
-
-    update_velocity(player, dt, fx, fy)
-    update_position(player, dt)
-
-    -- bullet update: explore the table backward
+    -- enemy bullet update: explore the table backward
     for i = #(game.enemy_bullets), 1, -1 do
         local bullet = game.enemy_bullets[i]
 
@@ -186,6 +140,67 @@ function love.update (dt)
             player.explode = true
             table.remove(game.enemy_bullets, i)
         end
+
+        update_position(bullet, dt)
+    end
+
+    -- player update
+    -- calculate control forces
+    local fx, fy = 0, 0
+
+    if player.explode ~= true then
+        if player.up == true then fy = fy - 1000 end
+        if player.down == true then fy = fy + 1000 end
+        if player.left == true then fx = fx - 1000 end
+        if player.right == true then fx = fx + 1000 end
+    end
+
+    -- update the reticle
+    local mx, my = love.mouse.getPosition()
+    local h = love.viewport.getHeight()/2
+    local w = love.viewport.getWidth()/2
+
+    local rx, ry = mx - w, my - h
+    local theta = math.atan2(ry, rx)
+
+    player.reticle.theta = theta
+    player.reticle.rx = 100*math.cos(theta) + w
+    player.reticle.ry = 100*math.sin(theta) + h
+
+    player.charge = player.charge + dt
+    if player.charge > 1 then
+        local bullet = {
+            x = player.x, y = player.y, speed = 200
+        }
+
+        local theta = player.reticle.theta
+        local mag = bullet.speed
+
+        bullet.vx = mag*math.cos(theta) + player.vx
+        bullet.vy = mag*math.sin(theta) + player.vy
+
+        table.insert(game.player_bullets, bullet)
+
+        player.charge = player.charge - (1 + math.random())
+    end
+
+    update_velocity(player, dt, fx, fy)
+    update_position(player, dt)
+
+    -- player bullet update: explore the table backward
+    for i = #(game.player_bullets), 1, -1 do
+        local bullet = game.player_bullets[i]
+
+        -- if the bullet has struck the player, explode
+        -- control forces: ships fly to maintain constant distance from player
+--      local dx, dy = bullet.x - player.x, bullet.y - player.y
+--      local square_distance = math.pow(dx, 2) + math.pow(dy, 2)
+
+--      -- explode the player if the ship has collided
+--      if square_distance < math.pow(player.r, 2) then
+--          player.explode = true
+--          table.remove(game.enemy_bullets, i)
+--      end
 
         update_position(bullet, dt)
     end

@@ -6,6 +6,7 @@ function love.load()
     require('game/load')
 
     love.mouse.setVisible(false)
+    love.mouse.setGrabbed(true)
 
     local some_max = 200
 
@@ -38,6 +39,8 @@ function love.load()
     game.player.left = false
     game.player.right = false
 
+    game.player.reticle = { }
+
     game.boss = { }
     game.mother_ship = {
         x = 0, y = 0,
@@ -48,6 +51,7 @@ function love.load()
     game.wings = {} -- collections of ships that flock
 
     game.enemy_bullets = {}
+    game.player_bullets = {}
 
     game.camera = {
         x = 0,
