@@ -29,25 +29,16 @@ local function drawStars (xoff, yoff, starscale)
     local size = STAR_TILE_SIZE / starscale
     local w, h = love.viewport.getWidth(), love.viewport.getHeight()
 
-   -- local sx = ((xoff - w/2) / size) * size - size;
-   -- local sy = ((yoff - h/2) / size) * size - size;
     local sx, sy = math.floor(xoff) - size, math.floor(yoff) - size
 
     local x_lerp = (xoff % size)
     local y_lerp = (yoff % size)
-
-    love.graphics.rectangle('fill', sx, sy, 10, 10)
 
     for i = sx, w + sx + size*3, size do
         for j = sy, h + sy + size*3, size do
             -- each square in the lattice is indexed uniquely
             -- so that it produces a unique hash
             local hash = mix(STAR_SEED, math.floor(i / size), math.floor(j / size))
-
-            -- this saved me a few times for debugging
---          love.graphics.setColor(200, 0, 0)
---          love.graphics.rectangle('line', i - xoff, j - yoff, size, size)
---          love.graphics.setColor(255, 255, 255)
 
             for n = 0, 2 do
                 local px = (hash % size) + (i - xoff);
@@ -77,15 +68,28 @@ function love.draw()
     love.graphics.translate(game.camera.x, game.camera.y)
 
 
-    love.graphics.setColor(255, 255, 255)
-    love.graphics.circle('fill', player.x, player.y, 10)
+    if player.explode ~= true then
+        love.graphics.setColor(255, 255, 255)
+        love.graphics.circle('fill', player.x, player.y, player.r)
+    else
+        love.graphics.setColor(255, 0, 0)
+        love.graphics.circle('fill', player.x, player.y, player.r * 3)
+    end
 
     -- Draw here
     for i, ship in pairs(game.ships) do
 
         -- shop draw
         love.graphics.setColor(255, 255, 255)
-        love.graphics.circle('fill', ship.x, ship.y, 10)
+        love.graphics.circle('fill', ship.x, ship.y, ship.r)
+
+        if ship.explode ~= true then
+            love.graphics.setColor(255, 255, 255)
+            love.graphics.circle('fill', ship.x, ship.y, ship.r)
+        else
+            love.graphics.setColor(255, 0, 0)
+            love.graphics.circle('fill', ship.x, ship.y, ship.r * 3)
+        end
     end
 
     love.graphics.pop()

@@ -43,30 +43,43 @@ end
 function love.update (dt)
     local player = game.player
 
+    -- player should check for other ships
+    -- player should check for bullets
+    -- every ship should check for player bullets
+
     --Update here
     for i, ship in pairs(game.ships) do
+
         -- control forces: ships fly to maintain constant distance from player
         local dx, dy = ship.x - player.x, ship.y - player.y
         local square_distance = math.pow(dx, 2) + math.pow(dy, 2)
         local fx, fy
 
-        if not (square_distance < ship.square_target_radius + 1000 and ship.square_target_radius - 1000 < square_distance) then
-            ship.orbiting = false
-            -- the distance is positive, then the force must be negative
-            fx = -dx
-            fy = -dy
-        else
-            if orbiting == false then
-                -- choose an orbit direction
-                if ship.vx > ship.vy then
-                    fy = 1000
-                elseif ship.vy > ship.vx then
-                    fx = 1000
-                else
-                    print("IMPOSSIBLE!")
-                end
+        -- explode the player if the ship has collided
+        if square_distance < math.pow(ship.r + player.r, 2) then
+            player.explode = true
+            ship.explode = true
+        end
 
-                ship.orbiting = true
+        if ship.explode ~= true then
+            if not (square_distance < ship.square_target_radius + 1000 and ship.square_target_radius - 1000 < square_distance) then
+                ship.orbiting = false
+                -- the distance is positive, then the force must be negative
+                fx = -dx
+                fy = -dy
+            else
+                if orbiting == false then
+                    -- choose an orbit direction
+                    if ship.vx > ship.vy then
+                        fy = 1000
+                    elseif ship.vy > ship.vx then
+                        fx = 1000
+                    else
+                        print("IMPOSSIBLE!")
+                    end
+
+                    ship.orbiting = true
+                end
             end
         end
 
@@ -77,10 +90,12 @@ function love.update (dt)
     -- calculate control forces
     local fx, fy = 0, 0
 
-    if player.up == true then fy = fy - 1000 end
-    if player.down == true then fy = fy + 1000 end
-    if player.left == true then fx = fx - 1000 end
-    if player.right == true then fx = fx + 1000 end
+    if player.explode ~= true then
+        if player.up == true then fy = fy - 1000 end
+        if player.down == true then fy = fy + 1000 end
+        if player.left == true then fx = fx - 1000 end
+        if player.right == true then fx = fx + 1000 end
+    end
 
     update_velocity(player, dt, fx, fy)
     update_position(player, dt)
@@ -91,7 +106,7 @@ function love.update (dt)
     local cx = love.viewport.getWidth() / 2
     local cy = love.viewport.getHeight() / 2
 
-    -- coords of the player relative to the origin
+    -- coords of the player relative to the graphics origin
     local px, py = player.x, player.y
 
     game.camera.x = cx - px
