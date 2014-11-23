@@ -1,3 +1,6 @@
+-- FOR THE TIME BEING, THIS FILE IS DEFUNCT
+-- DEFER TO GAME/UPDATE
+
 local STAR_SEED = 0x9d2c5680;
 local STAR_TILE_SIZE = 256;
 local rshift, lshift, arshift, bxor, tohex = bit.rshift, bit.lshift, bit.arshift, bit.bxor, bit.tohex

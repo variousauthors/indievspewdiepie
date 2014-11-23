@@ -1,3 +1,6 @@
+-- FOR THE TIME BEING, THIS FILE IS DEFUNCT
+-- DEFER TO GAME/DRAW
+
 love.viewport = require('libs/viewport').newSingleton()
 
 function love.draw()
