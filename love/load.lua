@@ -91,6 +91,9 @@ function love.load()
         return game.variables[key]
     end
 
+    -- happens once before anything
+    game.init()
+
 --  love.viewport.setFullscreen()
 --  love.viewport.setupScreen()
 
@@ -105,6 +108,7 @@ function love.load()
     state_machine.addState({
         name       = "run",
         init       = function ()
+            game.init()
         end,
         draw       = function ()
             game.draw()
@@ -122,8 +126,6 @@ function love.load()
     state_machine.addState({
         name       = "start",
         init       = function ()
-            game.init()
-
             menu.show(function (options)
                 profile = settings_menu.recoverProfile()
 
@@ -228,7 +230,11 @@ function love.load()
         from      = "run",
         to        = "start",
         condition = function ()
-            return game.player.explode == nil and state_machine.isSet("escape")
+            if game.player.explode == nil and state_machine.isSet("escape") then
+                game.init()
+
+                return true
+            end
         end
     })
 
