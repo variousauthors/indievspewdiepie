@@ -90,7 +90,7 @@ local function lookUpStars (xoff, yoff, starscale)
                         sx = px - x_lerp - game.camera.x,
                         sy = py - y_lerp - game.camera.y,
                         r = r,
-                        color = color
+                        color = 150 + (hash % 55),
                     }
 
                     -- one of the rocks should have a factory

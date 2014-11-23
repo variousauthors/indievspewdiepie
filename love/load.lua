@@ -20,7 +20,8 @@ function love.load()
             max_speed = max,
             square_max_speed = math.pow(max, 2),
             target_radius = gold,
-            charge = 0
+            charge = 0,
+            engine_tic = 0
         }
 
         if gold ~= nil then ship.square_target_radius = math.pow(gold, 2) end

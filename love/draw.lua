@@ -11,8 +11,9 @@ function love.draw()
     end
 
     for i, rock in pairs(game.active_asteroids) do
+        love.graphics.setColor(rock.color, rock.color, rock.color)
         love.graphics.polygon('fill', rock.verts)
-
+        love.graphics.setColor(255, 255, 255)
     end
 
     for i, factory in pairs(game.active_factories) do
@@ -40,16 +41,31 @@ function love.draw()
     -- draw the player
     do
         if player.explode == nil then
+            player.engine_tic = (player.engine_tic + 1) % 3
+
+            if player.engine_tic == 0 then
+                love.graphics.setColor(255, 100, 100)
+                love.graphics.circle('line', player.x, player.y, player.r)
+            end
+
             love.graphics.setColor(255, 255, 255)
-            love.graphics.circle('fill', player.x, player.y, player.r)
+            love.graphics.circle('fill', player.x, player.y, player.r - 1)
+            love.graphics.setColor(255, 255, 255)
         end
     end
 
     -- Draw here
     for i, ship in pairs(game.ships) do
         if ship.explode == nil then
+            ship.engine_tic = (ship.engine_tic + 1) % 3
+
+            if ship.engine_tic == 0 then
+                love.graphics.setColor(100, 100, 255)
+                love.graphics.circle('line', ship.x, ship.y, ship.r)
+            end
+
             love.graphics.setColor(255, 255, 255)
-            love.graphics.circle('fill', ship.x, ship.y, ship.r)
+            love.graphics.circle('fill', ship.x, ship.y, ship.r - 2)
         end
     end
 
