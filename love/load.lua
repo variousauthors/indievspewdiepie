@@ -24,14 +24,24 @@ function love.load()
     require('game/controls')
     require('game/sounds')
     require('libs/gamejolt')
+    require('libs/fsm')
+    require('game/update')
 
-    gj = GameJolt(conf.floor_height, conf.side_length)
-    --gj.connect_user(profile.username, profile.token)
+    Component = require('libs/component')
+
+    Menu = require('game/menu')
+    SettingsMenu = require('game/settings_menu')
 
     love.mouse.setVisible(false)
     love.mouse.setGrabbed(true)
 
     local some_max = 500
+
+    -- global variables for integration with dp menus
+    W_HEIGHT = love.viewport.getHeight()
+    SCORE_FONT     = love.graphics.newFont("assets/Audiowide-Regular.ttf", 14)
+    SPACE_FONT     = love.graphics.newFont("assets/Audiowide-Regular.ttf", 64)
+
 
     -- import image assets
     game.star_field = love.graphics.newImage('assets/star_field.png')
@@ -71,6 +81,167 @@ function love.load()
         y = 0
     }
 
+    game.variables = {}
+
+    game.set = function (key, value)
+        game.variables[key] = value
+    end
+
+    game.get = function (key)
+        return game.variables[key]
+    end
+
 --  love.viewport.setFullscreen()
 --  love.viewport.setupScreen()
+
+    menu          = Menu()
+    settings_menu = SettingsMenu()
+    gj = GameJolt(conf.floor_height, conf.side_length)
+
+    --gj.connect_user(profile.username, profile.token)
+
+    state_machine = FSM()
+
+    state_machine.addState({
+        name       = "run",
+        init       = function ()
+            game.init()
+        end,
+        draw       = function ()
+            game.draw()
+            score_band.draw()
+        end,
+        update     = game.update,
+        keypressed = game.keypressed
+    })
+
+    local profile = nil
+
+    state_machine.addState({
+        name       = "start",
+        init       = function ()
+
+            menu.show(function (options)
+                profile = settings_menu.recoverProfile()
+
+                if profile then
+                    gj.connect_user(profile.username, profile.token)
+                end
+
+                game.set(options.arity, true)
+                --game.set(options.mode, true)
+
+                menu.reset()
+            end)
+        end,
+        draw       = menu.draw,
+        keypressed = function (key)
+            if (key == "escape") then
+                love.event.quit()
+            end
+
+            menu.keypressed(key)
+        end,
+        update     = menu.update
+    })
+
+    state_machine.addState({
+        name       = "settings",
+        init       = function ()
+            game.set("settings", nil)
+            settings_menu.show(function (options)
+                profile = settings_menu.recoverProfile()
+                game.set(options.mode, true)
+
+                if profile then
+                    gj.connect_user(profile.username, profile.token)
+                end
+                -- NOP
+            end)
+        end,
+        draw       = settings_menu.draw,
+        keypressed = settings_menu.keypressed,
+        update     = settings_menu.update,
+        textinput  = settings_menu.textinput
+    })
+
+    state_machine.addState({
+        name       = "win",
+        init       = function ()
+            -- talk to GameJolt
+            diff = score_band.getDifference()
+            gj.add_score(diff, diff * 100)
+        end,
+        update = function (dt) end,
+        draw       = function () end
+    })
+
+    -- start the game when the player chooses a menu option
+    state_machine.addTransition({
+        from      = "start",
+        to        = "run",
+        condition = function ()
+            return not menu.isShowing() and not game.get("settings")
+        end
+    })
+
+    state_machine.addTransition({
+        from      = "start",
+        to        = "settings",
+        condition = function ()
+            return game.get("settings")
+        end
+    })
+
+    state_machine.addTransition({
+        from      = "settings",
+        to        = "start",
+        condition = function ()
+
+            return state_machine.isSet("escape") or not settings_menu.isShowing()
+        end
+    })
+
+    -- reset the game if there is a winner
+    state_machine.addTransition({
+        from      = "run",
+        to        = "win",
+        condition = function ()
+            return game.getWinner() ~= nil
+        end
+    })
+
+    -- restart the game if the player presses space
+    state_machine.addTransition({
+        from      = "run",
+        to        = "run",
+        condition = function ()
+            return game.getWinner() == nil and game.isAlone() and state_machine.isSet(" ")
+        end
+    })
+
+    -- return to the menu screen if any player presses escape
+    state_machine.addTransition({
+        from      = "run",
+        to        = "start",
+        condition = function ()
+            return game.getWinner() == nil and state_machine.isSet("escape")
+        end
+    })
+
+    -- restart the game if the player presses space
+    state_machine.addTransition({
+        from      = "win",
+        to        = "run",
+        condition = function ()
+            return true
+        end
+    })
+
+    love.update     = state_machine.update
+    love.keypressed = state_machine.keypressed
+    love.textinput  = state_machine.textinput
+    love.draw       = state_machine.draw
+
+    state_machine.start()
 end
