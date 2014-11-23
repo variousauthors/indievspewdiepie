@@ -45,10 +45,14 @@ local function lookUpStars (xoff, yoff, starscale)
                 -- if this is in a strip of the belt
                 local distance = math.sqrt(math.pow(ii, 2) + math.pow(jj, 2))
 
-                if distance % 7 < 2 then
-                    populate = 2
-                elseif distance % 7 > 6 then
-                    populate = 3
+                if distance > 7 then
+                    local empty_space = 7
+
+                    if distance % empty_space < 2 then
+                        populate = 4
+                    elseif distance % empty_space > 6 then
+                        populate = 3
+                    end
                 end
             end
 
@@ -66,7 +70,7 @@ local function lookUpStars (xoff, yoff, starscale)
                         y = py - y_lerp
                     })
                 end
-            elseif populate == 2 or populate == 3 then
+            elseif populate == 2 or populate == 3 or populate == 4 then
                 local id = hash
 
                 -- populate with 3 asteroids
@@ -94,24 +98,32 @@ local function lookUpStars (xoff, yoff, starscale)
                     }
 
                     -- one of the rocks should have a factory
-                    if n == 0 and populate == 3 then
+                    if n == 0 and (populate == 3 or populate == 4) then
                         local w = rock.r/5
+
+                        -- putting north rocks facing north yo
+                        local offset
+                        if populate == 4 then
+                            offset = - rock.r
+                        else
+                            offset = 0
+                        end
 
                         local factory = {
                             id = id,
-                            rock = rock,
+                            rock = { x = rock.x + offset, y = rock.y + offset, r = rock.r },
                             w = w,
-                            x = rock.x + rock.r/2 - w/2,
-                            y = rock.y + rock.r/2 - w/2,
+                            x = rock.x + rock.r/2 - w/2 + offset,
+                            y = rock.y + rock.r/2 - w/2 + offset,
                         }
 
                         if game.all_factories[id] == nil then
                             -- the stats
                             game.all_factories[id] = {
-                                sx = rock.sx,
-                                sy = rock.sy,
-                                work = 900,
-                                ready = 900
+                                sx = rock.sx + offset,
+                                sy = rock.sy + offset,
+                                work = 600,
+                                ready = 600
                             }
                         end
 
@@ -268,24 +280,23 @@ function love.update (dt)
     for i, ship in pairs(game.ships) do
         local fx, fy = 0, 0
 
-        -- control forces: ships fly to maintain constant distance from player
-        local dx, dy = ship.x - player.x, ship.y - player.y
-        local square_distance = math.pow(dx, 2) + math.pow(dy, 2)
-
-        -- explode the player if the ship has collided
-        if player.explode == nil then
-            if square_distance < math.pow(ship.r + player.r, 2) then
-                player.explode = 5
-                love.soundman.run('player_explodes')
-
-                ship.explode = 5
-                table.insert(game.explosions, player)
-                table.insert(game.explosions, ship)
-            end
-        end
-
         if ship.explode == nil then
+            -- explode the player if the ship has collided
+            local dx, dy = ship.x - player.x, ship.y - player.y
+            local square_distance = math.pow(dx, 2) + math.pow(dy, 2)
 
+            if player.explode == nil then
+                if square_distance < math.pow(ship.r + player.r, 2) then
+                    player.explode = 5
+                    love.soundman.run('player_explodes')
+
+                    ship.explode = 5
+                    table.insert(game.explosions, player)
+                    table.insert(game.explosions, ship)
+                end
+            end
+
+            -- control forces: ships fly to maintain constant distance from player
             -- ships try to stay in an orbit around the player, within the goldylocks zone
             if not (square_distance < ship.square_target_radius + 1000 and ship.square_target_radius - 1000 < square_distance) then
                 ship.orbiting = false

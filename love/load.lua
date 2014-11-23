@@ -1,33 +1,37 @@
+function Ship (x, y, m, r, max, gold)
+    local ship = {
+        x = x,
+        y = y,
+        vx = 0,
+        vy = 0,
+        m = m,
+        r = r,
+        max_speed = max,
+        square_max_speed = math.pow(max, 2),
+        target_radius = gold,
+        charge = 0,
+        engine_tic = 0
+    }
+
+    if gold ~= nil then ship.square_target_radius = math.pow(gold, 2) end
+
+    return ship
+end
+
 function love.load()
     love.debug.setFlag("input")
 
     require('game/controls')
     require('game/sounds')
+    require('libs/gamejolt')
+
+    gj = GameJolt(conf.floor_height, conf.side_length)
+    --gj.connect_user(profile.username, profile.token)
 
     love.mouse.setVisible(false)
     love.mouse.setGrabbed(true)
 
     local some_max = 500
-
-    function Ship (x, y, m, r, max, gold)
-        local ship = {
-            x = x,
-            y = y,
-            vx = 0,
-            vy = 0,
-            m = m,
-            r = r,
-            max_speed = max,
-            square_max_speed = math.pow(max, 2),
-            target_radius = gold,
-            charge = 0,
-            engine_tic = 0
-        }
-
-        if gold ~= nil then ship.square_target_radius = math.pow(gold, 2) end
-
-        return ship
-    end
 
     -- import image assets
     game.star_field = love.graphics.newImage('assets/star_field.png')
