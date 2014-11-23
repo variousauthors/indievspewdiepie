@@ -44,8 +44,11 @@ local function lookUpStars (xoff, yoff, starscale)
             if starscale == 1 then
                 -- if this is in a strip of the belt
                 local distance = math.sqrt(math.pow(ii, 2) + math.pow(jj, 2))
-                if distance % 5 < 2 then
+
+                if distance % 7 < 2 then
                     populate = 2
+                elseif distance % 7 > 6 then
+                    populate = 3
                 end
             end
 
@@ -63,7 +66,8 @@ local function lookUpStars (xoff, yoff, starscale)
                         y = py - y_lerp
                     })
                 end
-            elseif populate == 2 then
+            elseif populate == 2 or populate == 3 then
+
                 -- populate with 3 asteroids
                 for n = 0, 2 do
                     local px = (hash % size) + (i - xoff);
@@ -84,8 +88,21 @@ local function lookUpStars (xoff, yoff, starscale)
                         -- are in the same space as all other game objects, WITHOUT this bullshit here
                         sx = px - x_lerp - game.camera.x,
                         sy = py - y_lerp - game.camera.y,
-                        r = r
+                        r = r,
+                        color = color
                     }
+
+                    -- one of the rocks should have a factory
+                    if n == 0 and populate == 3 then
+                        local w = rock.r/5
+                        local factory = {
+                            rock = rock, w = w,
+                            x = rock.x + rock.r/2 - w/2,
+                            y = rock.y + rock.r/2 - w/2
+                        }
+
+                        table.insert(game.active_factories, factory)
+                    end
 
                     local theta = 0
                     local num_verts = 5 + (hash % 3) + (hash % 5) + (hash % 7)
@@ -403,7 +420,7 @@ function love.update (dt)
     local mom = game.mother_ship
 
     mom.charge = mom.charge + dt
-    if mom.charge > 5 then
+    if mom.charge > 5000 then
         local wing = {}
 
         for i = 1, math.floor(math.random() * 5) do
@@ -437,6 +454,7 @@ function love.update (dt)
     -- generate stars and asteroids for the currently active space
     game.star_layers = {}
     game.active_asteroids = {}
+    game.active_factories = {}
 
     -- passing in negative camera offset so that the stars appear
     -- to travel in the opposite direction to the camera

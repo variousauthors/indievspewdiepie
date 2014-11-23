@@ -7,7 +7,7 @@ function love.load()
     love.mouse.setVisible(false)
     love.mouse.setGrabbed(true)
 
-    local some_max = 200
+    local some_max = 500
 
     function Ship (x, y, m, r, max, gold)
         local ship = {
@@ -50,6 +50,7 @@ function love.load()
     }
 
     game.active_asteroids = {}
+    game.active_factories = {}
     game.star_layers = {}
     game.explosions = {}
 

@@ -12,6 +12,18 @@ function love.draw()
 
     for i, rock in pairs(game.active_asteroids) do
         love.graphics.polygon('fill', rock.verts)
+
+    end
+
+    for i, factory in pairs(game.active_factories) do
+        local rock = factory.rock
+
+        love.graphics.setColor(0, 100, 255)
+        love.graphics.setLineWidth(2)
+        love.graphics.rectangle('line', rock.x, rock.y, rock.r, rock.r)
+        love.graphics.rectangle('line', factory.x, factory.y, factory.w, factory.w)
+        love.graphics.setLineWidth(1)
+        love.graphics.setColor(255, 255, 255)
     end
 
     -- empty the asteroid data for next run
