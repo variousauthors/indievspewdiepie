@@ -326,6 +326,13 @@ function love.update (dt)
         local fx, fy = 0, 0
 
         if player.explode ~= true then
+            -- process an input from the buffer
+            if #(player.input.up) > 0 then player.up = table.remove(player.input.up, 1) end
+            if #(player.input.down) > 0 then player.down = table.remove(player.input.down, 1) end
+            if #(player.input.left) > 0 then player.left = table.remove(player.input.left, 1) end
+            if #(player.input.right) > 0 then player.right = table.remove(player.input.right, 1) end
+            if #(player.input.gun) > 0 then player.gun = table.remove(player.input.gun, 1) end
+
             if player.up == true then fy = fy - 1000 end
             if player.down == true then fy = fy + 1000 end
             if player.left == true then fx = fx - 1000 end

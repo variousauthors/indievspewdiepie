@@ -33,10 +33,13 @@ function love.load()
 
     -- create game objects
     game.player = Ship(0, 0, 2, 10, some_max)
-    game.player.up = false
-    game.player.down = false
-    game.player.left = false
-    game.player.right = false
+    game.player.input = {
+        up = {},
+        down = {},
+        left = {},
+        right = {},
+        gun = {}
+    }
 
     game.player.reticle = { r = 5 }
 
