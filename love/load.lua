@@ -111,8 +111,6 @@ function love.load()
     settings_menu = SettingsMenu()
     gj = GameJolt(conf.floor_height, conf.side_length)
 
-    --gj.connect_user(profile.username, profile.token)
-
     state_machine = FSM()
 
     state_machine.addState({
@@ -176,10 +174,6 @@ function love.load()
                 profile = settings_menu.recoverProfile()
                 game.set(options.mode, true)
 
-                if profile then
-                    gj.connect_user(profile.username, profile.token)
-                end
-                -- NOP
             end)
         end,
         draw       = settings_menu.draw,

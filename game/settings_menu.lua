@@ -110,25 +110,25 @@ return function ()
     end
 
     local writeProfile = function ()
-        local hfile = io.open("profile.lua", "w")
+        print("writeProfile")
+        local hfile = love.filesystem.newFile("profile.lua", "w")
         if hfile == nil then return end
 
-        hfile:write('return { username = "' .. username .. '", token = "' .. token .. '" }')--bad argument #1 to 'write' (string expected, got nil)
+        hfile:write('return { username = "' .. username .. '", token = "' .. token .. '" }')
 
-        io.close(hfile)
+        hfile:close()
     end
 
     local findProfile = function ()
-        local hfile = io.open("profile.lua", "r")
-        local found = hfile ~= nil
-
-        if found then io.close(hfile) end
-
-        return found
+        print("findProfile")
+        return love.filesystem.isFile("profile.lua")
     end
 
     local recoverProfile = function ()
-        return require("profile")
+        print("recoverProfile")
+        local profile = love.filesystem.load("profile.lua")
+        local status, result = pcall(profile)
+        if status then return result end
     end
 
     local show = function (callback)
