@@ -51,6 +51,7 @@ function love.load()
 
     game.active_asteroids = {}
     game.active_factories = {}
+    game.all_factories = {} -- indexed by id
     game.star_layers = {}
     game.explosions = {}
 

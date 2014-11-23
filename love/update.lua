@@ -67,6 +67,7 @@ local function lookUpStars (xoff, yoff, starscale)
                     })
                 end
             elseif populate == 2 or populate == 3 then
+                local id = hash
 
                 -- populate with 3 asteroids
                 for n = 0, 2 do
@@ -95,12 +96,26 @@ local function lookUpStars (xoff, yoff, starscale)
                     -- one of the rocks should have a factory
                     if n == 0 and populate == 3 then
                         local w = rock.r/5
+
                         local factory = {
-                            rock = rock, w = w,
+                            id = id,
+                            rock = rock,
+                            w = w,
                             x = rock.x + rock.r/2 - w/2,
-                            y = rock.y + rock.r/2 - w/2
+                            y = rock.y + rock.r/2 - w/2,
                         }
 
+                        if game.all_factories[id] == nil then
+                            -- the stats
+                            game.all_factories[id] = {
+                                sx = rock.sx,
+                                sy = rock.sy,
+                                work = 900,
+                                ready = 900
+                            }
+                        end
+
+                        -- graphics
                         table.insert(game.active_factories, factory)
                     end
 
@@ -412,33 +427,31 @@ function love.update (dt)
         update_position(bullet, dt)
     end
 
-    -- TODO when should we remove bullets? Maybe there needs to be debris to
-    -- soak them up?
+    -- factories update
+    for i, factory in pairs(game.active_factories) do
+        local factory = game.all_factories[factory.id]
 
-    -- mother ship update
-    -- launches ships
-    local mom = game.mother_ship
+        factory.work = factory.work + 1
+        if factory.work > factory.ready then
+            local wing = {}
 
-    mom.charge = mom.charge + dt
-    if mom.charge > 5000 then
-        local wing = {}
+            for i = 1, math.floor(math.random() * 3) do
+                local theta = math.random(0, 2*math.pi)
+                local x = factory.sx + 100*math.cos(theta)
+                local y = factory.sy + 100*math.sin(theta)
 
-        for i = 1, math.floor(math.random() * 5) do
-            local theta = math.random(0, 2*math.pi)
-            local x = mom.x + 100*math.cos(theta)
-            local y = mom.y + 100*math.sin(theta)
+                local ship = Ship(x, y, 3, 10, 200, 100)
 
-            local ship = Ship(x, y, 3, 10, 200, 100)
+                table.insert(wing, ship)
+                ship.wing = #(game.wings) + 1
 
-            table.insert(wing, ship)
-            ship.wing = #(game.wings) + 1
+                table.insert(game.ships, ship)
 
-            table.insert(game.ships, ship)
+                factory.work = 0
+            end
+
+            table.insert(game.wings, wing)
         end
-
-        table.insert(game.wings, wing)
-
-        mom.charge = mom.charge - (5 + math.random())
     end
 
     -- camera update
