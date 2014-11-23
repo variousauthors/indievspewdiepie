@@ -106,8 +106,8 @@ function love.load()
     -- happens once before anything
     game.init()
 
---  love.viewport.setFullscreen()
---  love.viewport.setupScreen()
+    love.viewport.setFullscreen()
+    love.viewport.setupScreen()
 
     menu          = Menu()
     settings_menu = SettingsMenu()
@@ -189,7 +189,7 @@ function love.load()
         init       = function ()
             -- talk to GameJolt
             --diff = score_band.getDifference()
-            gj.add_score("ONE", 1)
+            gj.add_score(game.score .. " points", game.score)
             game.player.explode = nil
         end,
         update = function (dt) end,

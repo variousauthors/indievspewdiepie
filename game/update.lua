@@ -515,6 +515,7 @@ function game.update (dt)
 
                 if square_distance < math.pow(ship.r + bullet.r, 2) then
                     ship.explode = 5
+                    ship.show_score = true
                     game.score = game.score + (ship.points_value * game.score_multiplier)
                     love.soundman.run('ship_explodes')
                     table.insert(game.explosions, ship)
