@@ -81,6 +81,14 @@ function game.draw()
 
             setColor(255, 255, 255)
             love.graphics.circle('fill', ship.x, ship.y, ship.r - 2)
+        elseif ship.fade_tic > 0 then
+            -- draw a word
+            ship.fade_tic = ship.fade_tic - 1
+            local a = ship.fade_tic/ship.initial_fade_tic
+
+            setColor(255*a, 255*a, 255*a)
+            love.graphics.print(ship.points_value * player.score_mulitplier, ship.x, ship.y)
+            setColor(255, 255, 255)
         end
     end
 

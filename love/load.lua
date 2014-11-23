@@ -10,7 +10,10 @@ function Ship (x, y, m, r, max, gold)
         square_max_speed = math.pow(max, 2),
         target_radius = gold,
         charge = 0,
-        engine_tic = 0
+        engine_tic = 0,
+        fade_tic = 60,
+        initial_fade_tic = 60,
+        points_value = 100
     }
 
     if gold ~= nil then ship.square_target_radius = math.pow(gold, 2) end
@@ -57,6 +60,7 @@ function love.load()
         }
 
         game.player.reticle = { r = 5 }
+        game.player.score_mulitplier = 1
 
         game.boss = { }
         game.mother_ship = {
