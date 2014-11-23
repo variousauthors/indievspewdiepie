@@ -219,8 +219,14 @@ end
 -- gravity drops off with 1/r^2 where r is distance to center of mass
 --
 
+local bullet_factor = 1
+
 function love.update (dt)
     local player = game.player
+
+    if player.explode == nil then
+        dt = dt * bullet_factor
+    end
 
     -- collide rocks with every other table
     for i, rock in pairs(game.active_asteroids) do
@@ -376,6 +382,7 @@ function love.update (dt)
         end
     end
 
+    local closest_bullet = 1000
     -- enemy bullet update: explore the table backward
     -- collide bullets with player, TODO collide with rocks
     for i = #(game.enemy_bullets), 1, -1 do
@@ -385,6 +392,7 @@ function love.update (dt)
         -- control forces: ships fly to maintain constant distance from player
         local dx, dy = bullet.x - player.x, bullet.y - player.y
         local square_distance = math.pow(dx, 2) + math.pow(dy, 2)
+        closest_bullet = math.min(closest_bullet, square_distance)
 
         -- explode the player if the ship has collided
         if player.explode == nil then
@@ -397,6 +405,13 @@ function love.update (dt)
         end
 
         update_position(bullet, dt)
+    end
+
+    if closest_bullet < 1000 then
+        bullet_factor = math.max(0.25, 1 - 300/closest_bullet)
+        print(bullet_factor)
+    else
+        bullet_factor = 1
     end
 
     -- player update
