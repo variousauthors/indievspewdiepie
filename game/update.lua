@@ -223,6 +223,8 @@ local bullet_factor = 1
 
 function game.update (dt)
     local player = game.player
+    local active_ship_count = 0
+    local time_since_fired = game.time_since_fired
 
     if player.explode == nil then
         dt = dt * bullet_factor
@@ -298,10 +300,15 @@ function game.update (dt)
 
     -- enemy update
     -- update velocity, collide with player, TODO collide with rocks
+
+    -- active_ship_count used to calculate score multiplier
+    active_ship_count = 0
+
     for i, ship in pairs(game.ships) do
         local fx, fy = 0, 0
 
         if ship.explode == nil then
+            active_ship_count = active_ship_count + 1
             -- explode the player if the ship has collided
             local dx, dy = ship.x - player.x, ship.y - player.y
             local square_distance = math.pow(dx, 2) + math.pow(dy, 2)
@@ -445,9 +452,15 @@ function game.update (dt)
             player.reticle.ry = 100*math.sin(theta) + h
 
             player.charge = math.min(1.5, player.charge + dt)
+
+            -- used to calculate score multiplier
+            multiplier_acquisition_rate = math.pow(active_ship_count, 1.5)
+            time_since_fired = time_since_fired + dt*multiplier_acquisition_rate
+
             if player.charge > 1 then
                 if player.gun == true then
                     love.soundman.run('player_laser')
+                    time_since_fired = 0
 
                     player.gun = false
                     local bullet = {
@@ -471,6 +484,25 @@ function game.update (dt)
         update_position(player, dt)
     end
 
+    -- calculate the score multiplier
+    do
+        -- if you've dodged long enough, multiplier goes up
+        if time_since_fired > game.next_multiplier_at() then
+            game.score_multiplier = game.score_multiplier + 1
+
+            time_since_fired = 0
+        end
+
+        -- if you've killed them all, then reset multiplier?
+        -- TODO I'm not sure if this is more fun...
+        if active_ship_count == 0 then
+            game.score_multiplier = 1
+        end
+
+        -- for draw routine
+        game.time_since_fired = time_since_fired
+    end
+
     -- player bullet update
     for i = #(game.player_bullets), 1, -1 do
         local bullet = game.player_bullets[i]
@@ -483,6 +515,7 @@ function game.update (dt)
 
                 if square_distance < math.pow(ship.r + bullet.r, 2) then
                     ship.explode = 5
+                    game.score = game.score + (ship.points_value * game.score_multiplier)
                     love.soundman.run('ship_explodes')
                     table.insert(game.explosions, ship)
                 end

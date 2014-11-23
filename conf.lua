@@ -11,8 +11,8 @@ end
 function love.conf(t)
     t.window.title = "Gunship Souls"
 
-    t.sides = { 1005366685, 1351747387, 3316243027, 930149632 }
-    t.floor_height = 27754
+    t.sides = { 604046728, 2724984046, 3362718332, 3042791539 }
+    t.floor_height = 38623
 
     t.side_length   = ""
     t.floor_height  = "" .. t.floor_height

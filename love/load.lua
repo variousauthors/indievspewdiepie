@@ -10,7 +10,10 @@ function Ship (x, y, m, r, max, gold)
         square_max_speed = math.pow(max, 2),
         target_radius = gold,
         charge = 0,
-        engine_tic = 0
+        engine_tic = 0,
+        fade_tic = 60,
+        initial_fade_tic = 60,
+        points_value = 100
     }
 
     if gold ~= nil then ship.square_target_radius = math.pow(gold, 2) end
@@ -60,6 +63,13 @@ function love.load()
         game.player.score = 0
         game.player.multiplier = 0
 
+        game.score = 0
+        game.score_multiplier = 1
+        game.next_multiplier_at = function ()
+            return game.score_multiplier*100
+        end
+        game.time_since_fired = 0
+
         game.boss = { }
         game.mother_ship = {
             x = 0, y = 0,
@@ -102,8 +112,6 @@ function love.load()
     menu          = Menu()
     settings_menu = SettingsMenu()
     gj = GameJolt(conf.floor_height, conf.side_length)
-
-    --gj.connect_user(profile.username, profile.token)
 
     state_machine = FSM()
 
@@ -168,10 +176,6 @@ function love.load()
                 profile = settings_menu.recoverProfile()
                 game.set(options.mode, true)
 
-                if profile then
-                    gj.connect_user(profile.username, profile.token)
-                end
-                -- NOP
             end)
         end,
         draw       = settings_menu.draw,

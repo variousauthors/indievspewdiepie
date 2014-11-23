@@ -1,43 +1,7 @@
-
-USERNAME = 0
-TOKEN    = 1
-
 return function ()
     local showing       = false
     local hide_callback = function () end
-    local cursor_pos    = 0
-    local menu_index    = 0
-    local username      = ""
-    local token         = ""
-    local mode          = "STATIC"
     local time, flash   = 0, 0
-
-    local inputs = {
-        {   -- username
-            clear      = function ()
-                username = ""
-                username_cursor_pos = 200
-            end,
-            textinput = function (key)
-                username = username .. key
-            end
-        },
-        {   -- token
-            clear      = function ()
-                token = ""
-                token_cursor_pos = 200
-            end,
-            textinput = function (key)
-                token = token .. key
-            end
-        }
-    }
-
-    local drawCursor = function (x, y)
-        local icon = ""
-
-        love.graphics.print(icon, x + cursor_pos, y)
-    end
 
     local drawUsername = function (x, y)
         local icon = ""
@@ -78,12 +42,12 @@ return function ()
 
     local drawSubtitle = function (x, y)
         love.graphics.setFont(SCORE_FONT)
-        love.graphics.printf("there is a king in space, who lurks", x, y, 576, "right")
+        love.graphics.printf("find the darkest path to the center", x, y, 576, "right")
     end
 
     local drawTitle = function (x, y)
         love.graphics.setFont(SPACE_FONT)
-        love.graphics.print("GUNSHIP SOULS", x, y)
+        love.graphics.print("DARKEST PATH", x, y)
     end
 
     -- TODO redo this with proper nesting. SUCK GOAT.
@@ -110,25 +74,25 @@ return function ()
     end
 
     local writeProfile = function ()
-        print("writeProfile")
-        local hfile = love.filesystem.newFile("profile.lua", "w")
+        local hfile = io.open("profile.lua", "w")
         if hfile == nil then return end
 
-        hfile:write('return { username = "' .. username .. '", token = "' .. token .. '" }')
+        hfile:write('return { username = "' .. username .. '", token = "' .. token .. '" }')--bad argument #1 to 'write' (string expected, got nil)
 
-        hfile:close()
+        io.close(hfile)
     end
 
     local findProfile = function ()
-        print("findProfile")
-        return love.filesystem.isFile("profile.lua")
+        local hfile = io.open("profile.lua", "r")
+        local found = hfile ~= nil
+
+        if found then io.close(hfile) end
+
+        return found
     end
 
     local recoverProfile = function ()
-        print("recoverProfile")
-        local profile = love.filesystem.load("profile.lua")
-        local status, result = pcall(profile)
-        if status then return result end
+        return require("profile")
     end
 
     local show = function (callback)
