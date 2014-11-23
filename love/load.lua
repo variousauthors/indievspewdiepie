@@ -32,7 +32,7 @@ function love.load()
     game.star_field = love.graphics.newImage('assets/star_field.png')
 
     -- create game objects
-    game.player = Ship(0, 0, 2, 10, some_max)
+    game.player = Ship(0, 0, 2, 5, some_max)
     game.player.input = {
         up = {},
         down = {},

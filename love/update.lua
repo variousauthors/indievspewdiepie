@@ -201,21 +201,29 @@ function love.update (dt)
 
         -- collide with player
         do
-            local dx, dy = player.x - rock.sx, player.y - rock.sy
-            local square_distance = math.pow(dx, 2) + math.pow(dy, 2)
+            if player.explode == nil then
+                local dx, dy = player.x - rock.sx, player.y - rock.sy
+                local square_distance = math.pow(dx, 2) + math.pow(dy, 2)
 
-            if square_distance < math.pow(rock.r, 2) then
-                player.explode = true
+                if square_distance < math.pow(rock.r, 2) then
+                    player.explode = 5
+                    love.soundman.run('player_explodes')
+                    table.insert(game.explosions, player)
+                end
             end
         end
 
         -- collide with ships
+        -- TODO if the rock has a factory, then it should not collide
         for i, ship in pairs(game.ships) do
-            local dx, dy = ship.x - rock.sx, ship.y - rock.sy
-            local square_distance = math.pow(dx, 2) + math.pow(dy, 2)
+            if ship.explode == nil then
+                local dx, dy = ship.x - rock.sx, ship.y - rock.sy
+                local square_distance = math.pow(dx, 2) + math.pow(dy, 2)
 
-            if square_distance < math.pow(rock.r, 2) then
-                ship.explode = true
+                if square_distance < math.pow(rock.r, 2) then
+                    ship.explode = 5
+                    table.insert(game.explosions, ship)
+                end
             end
         end
 
@@ -263,12 +271,18 @@ function love.update (dt)
         local square_distance = math.pow(dx, 2) + math.pow(dy, 2)
 
         -- explode the player if the ship has collided
-        if square_distance < math.pow(ship.r + player.r, 2) then
-            player.explode = true
-            ship.explode = true
+        if player.explode == nil then
+            if square_distance < math.pow(ship.r + player.r, 2) then
+                player.explode = 5
+                love.soundman.run('player_explodes')
+
+                ship.explode = 5
+                table.insert(game.explosions, player)
+                table.insert(game.explosions, ship)
+            end
         end
 
-        if ship.explode ~= true then
+        if ship.explode == nil then
 
             -- ships try to stay in an orbit around the player, within the goldylocks zone
             if not (square_distance < ship.square_target_radius + 1000 and ship.square_target_radius - 1000 < square_distance) then
@@ -299,6 +313,7 @@ function love.update (dt)
             -- TODO this could be improved: the ai rarely hits!
             ship.charge = ship.charge + dt
             if ship.charge > 1 then
+                love.soundman.run('laser')
                 local bullet = {
                     x = ship.x, y = ship.y, speed = 200, r = 3
                 }
@@ -343,9 +358,13 @@ function love.update (dt)
         local square_distance = math.pow(dx, 2) + math.pow(dy, 2)
 
         -- explode the player if the ship has collided
-        if square_distance < math.pow(player.r, 2) then
-            player.explode = true
-            table.remove(game.enemy_bullets, i)
+        if player.explode == nil then
+            if square_distance < math.pow(player.r, 2) then
+                player.explode = 5
+                love.soundman.run('player_explodes')
+                table.remove(game.enemy_bullets, i)
+                table.insert(game.explosions, player)
+            end
         end
 
         update_position(bullet, dt)
@@ -357,7 +376,7 @@ function love.update (dt)
     do
         local fx, fy = 0, 0
 
-        if player.explode ~= true then
+        if player.explode == nil then
             -- process an input from the buffer
             if #(player.input.up) > 0 then player.up = table.remove(player.input.up, 1) end
             if #(player.input.down) > 0 then player.down = table.remove(player.input.down, 1) end
@@ -385,6 +404,8 @@ function love.update (dt)
             player.charge = math.min(1.5, player.charge + dt)
             if player.charge > 1 then
                 if player.gun == true then
+                    love.soundman.run('player_laser')
+
                     player.gun = false
                     local bullet = {
                         x = player.x, y = player.y, speed = 200, r = 3
@@ -415,11 +436,13 @@ function love.update (dt)
         for i = #(game.ships), 1, -1 do
             local ship = game.ships[i]
 
-            if not ship.explode == true then
+            if ship.explode == nil then
                 local square_distance = math.pow(ship.x - bullet.x, 2) + math.pow(ship.y - bullet.y, 2)
 
                 if square_distance < math.pow(ship.r + bullet.r, 2) then
-                    ship.explode = true
+                    ship.explode = 5
+                    love.soundman.run('ship_explodes')
+                    table.insert(game.explosions, ship)
                 end
             end
         end
@@ -433,9 +456,10 @@ function love.update (dt)
 
         factory.work = factory.work + 1
         if factory.work > factory.ready then
+            love.soundman.run('ship_complete')
             local wing = {}
 
-            for i = 1, math.floor(math.random() * 3) do
+            for i = 1, math.floor(math.random() * 5) do
                 local theta = math.random(0, 2*math.pi)
                 local x = factory.sx + 100*math.cos(theta)
                 local y = factory.sy + 100*math.sin(theta)

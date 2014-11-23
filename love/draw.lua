@@ -37,27 +37,19 @@ function love.draw()
     love.graphics.push()
     love.graphics.translate(game.camera.x, game.camera.y)
 
-    if player.explode ~= true then
-        love.graphics.setColor(255, 255, 255)
-        love.graphics.circle('fill', player.x, player.y, player.r)
-    else
-        love.graphics.setColor(255, 0, 0)
-        love.graphics.circle('fill', player.x, player.y, player.r * 3)
+    -- draw the player
+    do
+        if player.explode == nil then
+            love.graphics.setColor(255, 255, 255)
+            love.graphics.circle('fill', player.x, player.y, player.r)
+        end
     end
 
     -- Draw here
     for i, ship in pairs(game.ships) do
-
-        -- shop draw
-        love.graphics.setColor(255, 255, 255)
-        love.graphics.circle('fill', ship.x, ship.y, ship.r)
-
-        if ship.explode ~= true then
+        if ship.explode == nil then
             love.graphics.setColor(255, 255, 255)
             love.graphics.circle('fill', ship.x, ship.y, ship.r)
-        else
-            love.graphics.setColor(255, 0, 0)
-            love.graphics.circle('fill', ship.x, ship.y, ship.r * 3)
         end
     end
 
@@ -82,6 +74,7 @@ function love.draw()
 
         if explosion.explode < 0 then
             table.remove(game.explosions, i)
+            -- TODO then we should clean up the explosions memory
         else
             -- explosion should be bigger than whatever was exploding
             love.graphics.setColor(255, 0, 0)
