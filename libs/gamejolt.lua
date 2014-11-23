@@ -66,6 +66,9 @@ GameJolt = function (game_id, private_key)
 
             if result then
                 print("  YEAH, YOU'RE GOOD")
+            else
+                print("  NOPE, CHECK YOUR SETTINGS")
+                return result
             end
         else
             print("AUTHENTICATION FAILED")

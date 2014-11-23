@@ -26,6 +26,7 @@ function love.load()
     require('libs/gamejolt')
     require('libs/fsm')
     require('game/update')
+    require('game/draw')
 
     Component = require('libs/component')
 
@@ -42,52 +43,51 @@ function love.load()
     SCORE_FONT     = love.graphics.newFont("assets/Audiowide-Regular.ttf", 14)
     SPACE_FONT     = love.graphics.newFont("assets/Audiowide-Regular.ttf", 64)
 
-
-    -- import image assets
-    game.star_field = love.graphics.newImage('assets/star_field.png')
-
-    -- create game objects
-    game.player = Ship(0, 0, 2, 5, some_max)
-    game.player.input = {
-        up = {},
-        down = {},
-        left = {},
-        right = {},
-        gun = {}
-    }
-
-    game.player.reticle = { r = 5 }
-
-    game.boss = { }
-    game.mother_ship = {
-        x = 0, y = 0,
-        charge = 4
-    }
-
-    game.active_asteroids = {}
-    game.active_factories = {}
-    game.all_factories = {} -- indexed by id
-    game.star_layers = {}
-    game.explosions = {}
-
-    game.ships = { }
-    game.wings = {} -- collections of ships that flock
-
-    game.enemy_bullets = {}
-    game.player_bullets = {}
-
-    game.camera = {
-        x = 0,
-        y = 0
-    }
-
     game.variables = {}
 
-    game.set = function (key, value)
+    function game.init ()
+        -- create game objects
+        game.player = Ship(0, 0, 2, 5, some_max)
+        game.player.input = {
+            up = {},
+            down = {},
+            left = {},
+            right = {},
+            gun = {}
+        }
+
+        game.player.reticle = { r = 5 }
+
+        game.boss = { }
+        game.mother_ship = {
+            x = 0, y = 0,
+            charge = 4
+        }
+
+        game.active_asteroids = {}
+        game.active_factories = {}
+        game.all_factories = {} -- indexed by id
+        game.star_layers = {}
+        game.explosions = {}
+
+        game.ships = { }
+        game.wings = {} -- collections of ships that flock
+
+        game.enemy_bullets = {}
+        game.player_bullets = {}
+
+        game.camera = {
+            x = 0,
+            y = 0
+        }
+
+    end
+
+    function game.set (key, value)
         game.variables[key] = value
     end
 
-    game.get = function (key)
+    function game.get (key)
         return game.variables[key]
     end
 
@@ -109,10 +109,13 @@ function love.load()
         end,
         draw       = function ()
             game.draw()
-            score_band.draw()
+            -- score_band.draw()
         end,
         update     = game.update,
-        keypressed = game.keypressed
+        keypressed = game.keypressed,
+        keyreleased = game.keyreleased,
+        mousepressed = game.mousepressed,
+        mousereleased = game.mousereleased
     })
 
     local profile = nil
@@ -169,8 +172,9 @@ function love.load()
         name       = "win",
         init       = function ()
             -- talk to GameJolt
-            diff = score_band.getDifference()
-            gj.add_score(diff, diff * 100)
+            --diff = score_band.getDifference()
+            gj.add_score("ONE", 1)
+            game.player.explode = nil
         end,
         update = function (dt) end,
         draw       = function () end
@@ -207,16 +211,7 @@ function love.load()
         from      = "run",
         to        = "win",
         condition = function ()
-            return game.getWinner() ~= nil
-        end
-    })
-
-    -- restart the game if the player presses space
-    state_machine.addTransition({
-        from      = "run",
-        to        = "run",
-        condition = function ()
-            return game.getWinner() == nil and game.isAlone() and state_machine.isSet(" ")
+            return game.player.explode == 0
         end
     })
 
@@ -225,14 +220,14 @@ function love.load()
         from      = "run",
         to        = "start",
         condition = function ()
-            return game.getWinner() == nil and state_machine.isSet("escape")
+            return game.player.explode == nil and state_machine.isSet("escape")
         end
     })
 
     -- restart the game if the player presses space
     state_machine.addTransition({
         from      = "win",
-        to        = "run",
+        to        = "start",
         condition = function ()
             return true
         end
@@ -240,6 +235,9 @@ function love.load()
 
     love.update     = state_machine.update
     love.keypressed = state_machine.keypressed
+    love.keyreleased = state_machine.keyreleased
+    love.mousepressed = state_machine.mousepressed
+    love.mousereleased = state_machine.mousereleased
     love.textinput  = state_machine.textinput
     love.draw       = state_machine.draw
 

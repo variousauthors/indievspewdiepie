@@ -75,10 +75,23 @@ FSM = function ()
     end
 
     local keypressed = function (key)
-        -- transition to draw or win
         state_machine.set(key)
 
         if current_state.keypressed then current_state.keypressed(key) end
+    end
+
+    local keyreleased = function (key)
+        if current_state.keyreleased then current_state.keyreleased(key) end
+    end
+
+    local mousepressed = function (x, y, button)
+        state_machine.set(button)
+
+        if current_state.mousepressed then current_state.mousepressed(x, y, button) end
+    end
+
+    local mousereleased = function (x, y, button)
+        if current_state.mousereleased then current_state.mousereleased(x, y, button) end
     end
 
     local textinput = function (key)
@@ -92,6 +105,9 @@ FSM = function ()
             update      = state.update,
             draw        = state.draw,
             keypressed  = state.keypressed,
+            keyreleased  = state.keyreleased,
+            mousepressed  = state.mousepressed,
+            mousereleased  = state.mousereleased,
             textinput   = state.textinput,
             transitions = {},
             variables   = {}
@@ -129,6 +145,9 @@ FSM = function ()
         start         = start,
         update        = update,
         keypressed    = keypressed,
+        keyreleased    = keyreleased,
+        mousepressed    = mousepressed,
+        mousereleased    = mousereleased,
         textinput     = textinput,
         draw          = draw,
         addState      = addState,
