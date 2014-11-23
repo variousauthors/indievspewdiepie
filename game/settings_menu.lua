@@ -78,12 +78,12 @@ return function ()
 
     local drawSubtitle = function (x, y)
         love.graphics.setFont(SCORE_FONT)
-        love.graphics.printf("find the darkest path to the center", x, y, 576, "right")
+        love.graphics.printf("there is a king in space, who lurks", x, y, 576, "right")
     end
 
     local drawTitle = function (x, y)
         love.graphics.setFont(SPACE_FONT)
-        love.graphics.print("DARKEST PATH", x, y)
+        love.graphics.print("GUNSHIP SOULS", x, y)
     end
 
     -- TODO redo this with proper nesting. SUCK GOAT.

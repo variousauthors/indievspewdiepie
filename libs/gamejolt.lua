@@ -51,6 +51,7 @@ GameJolt = function (game_id, private_key)
 
     local authenticate = function ()
         print("AUTHENTICATING WITH GAMEJOLT")
+
         local result = ""
         local response = http_request({
             endpoint = "/users/auth/",
