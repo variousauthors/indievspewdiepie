@@ -1,13 +1,9 @@
 
-LANG     = 0
-USERNAME = 1
-TOKEN    = 2
-
 return function ()
     local showing       = false
     local hide_callback = function () end
     local cursor_pos    = 0
-    local choice        = "alone"
+    local choice        = "launch"
     local mode          = "dynamic"
     local menu_index    = 0
     local time, flash   = 0, 0
@@ -17,16 +13,8 @@ return function ()
             clear      = function ()
             end,
             keypressed = function (key)
-                choice = "alone"
+                choice = "launch"
                 cursor_pos = 0
-            end
-        },
-        {   -- language_select
-            clear      = function ()
-            end,
-            keypressed = function (key)
-                choice = "together"
-                cursor_pos = 30
             end
         },
         {   -- language_select
@@ -58,7 +46,7 @@ return function ()
 
     local title_part    = Component(0, 0, drawTitle)
     local subtitle_part = Component(0, 80, drawSubtitle)
-    local choice_part   = Component(0, 200, Component(0, 0, ""), Component(200, 0, drawCursor), Component(230, 0, "ALONE"), Component(230, 30, "TOGETHER"))
+    local choice_part   = Component(0, 200, Component(0, 0, ""), Component(200, 0, drawCursor), Component(230, 0, "LAUNCH"))
     local settings      = Component(0, 200, Component(0, 0, ""), Component(200, 0, drawCursor), Component(230, 90, "SETTINGS"))
 
     local component = Component(100, W_HEIGHT/2 - 200, title_part, subtitle_part, choice_part, settings)
