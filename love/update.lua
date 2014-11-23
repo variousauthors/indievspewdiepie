@@ -235,6 +235,7 @@ function love.update (dt)
 
             if square_distance < math.pow(rock.r, 2) then
                 bullet.explode = 3
+                love.soundman.run('bullet_rock')
                 table.remove(game.enemy_bullets, i)
                 table.insert(game.explosions, bullet)
             end
@@ -251,6 +252,7 @@ function love.update (dt)
             -- explode the player if the ship has collided
             if square_distance < math.pow(rock.r, 2) then
                 bullet.explode = 3
+                love.soundman.run('bullet_rock')
                 table.remove(game.player_bullets, i)
                 table.insert(game.explosions, bullet)
             end
