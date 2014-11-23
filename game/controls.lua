@@ -24,7 +24,8 @@ function game.keypressed(key)
     end
 
     if(key == 'f10' or key == 'escape') then
-        love.event.quit()
+        -- RADAR with the FSM this is handled per state
+--        love.event.quit()
     elseif(key == 'f11') then
         love.viewport.setFullscreen()
         love.viewport.setupScreen()

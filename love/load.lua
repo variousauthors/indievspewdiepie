@@ -105,7 +105,6 @@ function love.load()
     state_machine.addState({
         name       = "run",
         init       = function ()
-            game.init()
         end,
         draw       = function ()
             game.draw()
@@ -123,6 +122,7 @@ function love.load()
     state_machine.addState({
         name       = "start",
         init       = function ()
+            game.init()
 
             menu.show(function (options)
                 profile = settings_menu.recoverProfile()
@@ -137,7 +137,12 @@ function love.load()
                 menu.reset()
             end)
         end,
-        draw       = menu.draw,
+        draw = function ()
+            love.graphics.setColor(55, 55, 55, 255)
+            game.draw()
+            love.graphics.setColor(255, 255, 255, 255)
+            menu.draw()
+        end,
         keypressed = function (key)
             if (key == "escape") then
                 love.event.quit()
@@ -145,7 +150,10 @@ function love.load()
 
             menu.keypressed(key)
         end,
-        update     = menu.update
+        update     = function (dt)
+            game.update(dt)
+            menu.update(dt)
+        end
     })
 
     state_machine.addState({
