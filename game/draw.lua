@@ -87,7 +87,7 @@ function game.draw()
             local a = ship.fade_tic/ship.initial_fade_tic
 
             setColor(255*a, 255*a, 255*a)
-            love.graphics.print(ship.points_value * player.score_mulitplier, ship.x, ship.y)
+            love.graphics.print(ship.points_value * game.score_multiplier, ship.x, ship.y)
             setColor(255, 255, 255)
         end
     end
@@ -121,8 +121,36 @@ function game.draw()
         end
     end
 
-
     love.graphics.pop()
+
+    -- draw the score bar
+    do
+        local w = 200
+        local h = 15
+        local x = 0 + h - player.x
+        local y = love.viewport.getHeight() - h*3 - player.y
+
+        -- multiplier and bar
+        setColor(255, 255, 255)
+        love.graphics.setLineWidth(2)
+        love.graphics.rectangle('line', player.x + x, player.y + y, w, h + 2)
+        love.graphics.print('multiplier x' .. game.score_multiplier, player.x + x, player.y + y - h - 2)
+        love.graphics.setLineWidth(1)
+
+        -- score
+        love.graphics.print('score: ' .. game.score, player.x + x, player.y + y + h + 2)
+
+        x = x + 1
+        y = y + 1
+
+        setColor(100, 100, 100)
+        love.graphics.rectangle('fill', player.x + x, player.y + y, w - 2, h)
+        w = w * (game.time_since_fired / game.next_multiplier_at())
+        h = h
+        setColor(255, 100, 0)
+        love.graphics.rectangle('fill', player.x + x, player.y + y, w, h)
+        setColor(255, 255, 255)
+    end
 
     -- draw the reticle
     local mx, my = love.mouse.getPosition()

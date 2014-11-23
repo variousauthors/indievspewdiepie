@@ -60,7 +60,13 @@ function love.load()
         }
 
         game.player.reticle = { r = 5 }
-        game.player.score_mulitplier = 1
+
+        game.score = 0
+        game.score_multiplier = 1
+        game.next_multiplier_at = function ()
+            return game.score_multiplier*100
+        end
+        game.time_since_fired = 0
 
         game.boss = { }
         game.mother_ship = {
