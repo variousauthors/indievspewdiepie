@@ -53,6 +53,10 @@ local function lookUpStars (xoff, yoff, starscale)
                     elseif distance % empty_space > 6 then
                         populate = 3
                     end
+                else
+                    if distance < 2 then
+                        populate = 5
+                    end
                 end
             end
 
@@ -70,7 +74,7 @@ local function lookUpStars (xoff, yoff, starscale)
                         y = py - y_lerp
                     })
                 end
-            elseif populate == 2 or populate == 3 or populate == 4 then
+            elseif populate > 1 then
                 local id = hash
 
                 -- populate with 3 asteroids
@@ -98,8 +102,12 @@ local function lookUpStars (xoff, yoff, starscale)
                     }
 
                     -- one of the rocks should have a factory
-                    if n == 0 and (populate == 3 or populate == 4) then
+                    if n == 0 and (populate > 2) then
                         local w = rock.r/5
+                        local color = {
+                            work = { 0, 100, 100 },
+                            frame = { 0, 100, 255 }
+                        }
 
                         -- putting north rocks facing north yo
                         local offset
@@ -109,12 +117,20 @@ local function lookUpStars (xoff, yoff, starscale)
                             offset = 0
                         end
 
+                        if populate == 5 then
+                            color = {
+                                work = { 100, 100, 0 },
+                                frame = { 255, 100, 0 }
+                            }
+                        end
+
                         local factory = {
                             id = id,
                             rock = { x = rock.x + offset, y = rock.y + offset, r = rock.r },
                             w = w,
                             x = rock.x + rock.r/2 - w/2 + offset,
                             y = rock.y + rock.r/2 - w/2 + offset,
+                            color = color
                         }
 
                         if game.all_factories[id] == nil then
@@ -123,11 +139,11 @@ local function lookUpStars (xoff, yoff, starscale)
                                 sx = rock.sx + offset,
                                 sy = rock.sy + offset,
                                 work = 600,
-                                ready = 600
+                                ready = 600,
+                                passive = populate == 5
                             }
                         end
 
-                        -- graphics
                         table.insert(game.active_factories, factory)
                     end
 
@@ -469,25 +485,29 @@ function love.update (dt)
 
         factory.work = factory.work + 1
         if factory.work > factory.ready then
-            love.soundman.run('ship_complete')
-            local wing = {}
-
-            for i = 1, math.floor(math.random() * 5) do
-                local theta = math.random(0, 2*math.pi)
-                local x = factory.sx + 100*math.cos(theta)
-                local y = factory.sy + 100*math.sin(theta)
-
-                local ship = Ship(x, y, 3, 10, 200, 100)
-
-                table.insert(wing, ship)
-                ship.wing = #(game.wings) + 1
-
-                table.insert(game.ships, ship)
-
+            if factory.passive == true then
                 factory.work = 0
-            end
+            else
+                love.soundman.run('ship_complete')
+                local wing = {}
 
-            table.insert(game.wings, wing)
+                for i = 1, math.floor(math.random() * 5) do
+                    local theta = math.random(0, 2*math.pi)
+                    local x = factory.sx + 100*math.cos(theta)
+                    local y = factory.sy + 100*math.sin(theta)
+
+                    local ship = Ship(x, y, 3, 10, 200, 100)
+
+                    table.insert(wing, ship)
+                    ship.wing = #(game.wings) + 1
+
+                    table.insert(game.ships, ship)
+
+                    factory.work = 0
+                end
+
+                table.insert(game.wings, wing)
+            end
         end
     end
 

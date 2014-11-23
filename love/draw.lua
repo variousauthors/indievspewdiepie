@@ -23,13 +23,18 @@ function love.draw()
         local percent_done = (1 - stats.work/stats.ready)
         local inner_width = (rock.r - factory.w)*percent_done + factory.w
 
-        love.graphics.setColor(0, 100, 255)
+        -- draw the work timer indicator
+        love.graphics.setColor(unpack(factory.color.work))
+        love.graphics.setLineWidth(5)
+        love.graphics.rectangle('line', rock.x + (rock.r - inner_width)/2, rock.y + (rock.r - inner_width)/2, inner_width, inner_width)
+
+        -- draw the frame
+        love.graphics.setColor(unpack(factory.color.frame))
         love.graphics.setLineWidth(2)
         love.graphics.rectangle('line', rock.x, rock.y, rock.r, rock.r)
         love.graphics.rectangle('line', factory.x, factory.y, factory.w, factory.w)
-        love.graphics.setColor(0, 100, 100)
-        love.graphics.setLineWidth(5)
-        love.graphics.rectangle('line', rock.x + (rock.r - inner_width)/2, rock.y + (rock.r - inner_width)/2, inner_width, inner_width)
+
+        -- restore the context
         love.graphics.setLineWidth(1)
         love.graphics.setColor(255, 255, 255)
     end
