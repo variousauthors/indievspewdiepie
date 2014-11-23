@@ -57,6 +57,8 @@ function love.load()
         }
 
         game.player.reticle = { r = 5 }
+        game.player.score = 0
+        game.player.multiplier = 0
 
         game.boss = { }
         game.mother_ship = {

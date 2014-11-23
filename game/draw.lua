@@ -110,17 +110,19 @@ function game.draw()
             -- explosion should be bigger than whatever was exploding
             setColor(255, 0, 0)
             love.graphics.circle('fill', explosion.x, explosion.y, explosion.r * 3)
+            setColor(255, 255, 255)
         end
     end
-
 
     love.graphics.pop()
 
     -- draw the reticle
-    local mx, my = love.mouse.getPosition()
+    if player.explode == nil then
+        local mx, my = love.mouse.getPosition()
 
-    setColor(255, 0, 0)
-    love.graphics.circle('line', player.reticle.rx, player.reticle.ry, player.reticle.r)
-    love.graphics.circle('fill', mx, my, player.reticle.r)
-    setColor(255, 255, 255)
+        setColor(255, 0, 0)
+        love.graphics.circle('line', player.reticle.rx, player.reticle.ry, player.reticle.r)
+        love.graphics.circle('fill', mx, my, player.reticle.r)
+        setColor(255, 255, 255)
+    end
 end

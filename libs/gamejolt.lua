@@ -62,13 +62,19 @@ GameJolt = function (game_id, private_key)
         }).response
 
         if response ~= nil then
-            local result = string.find(unpack(response), 'success:"true"') -- TODO ha ha ha, until I find a JSON parser I like
+            local unpack_response = unpack(response)
+            if unpack_response ~= nil then
+                local result = string.find(unpack_response, 'success:"true"') -- TODO ha ha ha, until I find a JSON parser I like
 
-            if result then
-                print("  YEAH, YOU'RE GOOD")
+                if result then
+                    print("  YEAH, YOU'RE GOOD")
+                else
+                    print("  NOPE, CHECK YOUR SETTINGS")
+                    return false
+                end
             else
-                print("  NOPE, CHECK YOUR SETTINGS")
-                return result
+                print("  NOPE, CHECK YOUR CONNECTION")
+                return false
             end
         else
             print("AUTHENTICATION FAILED")
