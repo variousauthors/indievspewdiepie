@@ -83,6 +83,11 @@ return function ()
         return showing
     end
 
+    local mousepressed = function (x, y, button)
+        choice = "launch"
+        hide()
+    end
+
     local keypressed = function (key)
         if key == "return" or key == " " then
             hide()
@@ -113,6 +118,7 @@ return function ()
         draw           = draw,
         update         = update,
         keypressed     = keypressed,
+        mousepressed   = mousepressed,
         textinput      = textinput,
         show           = show,
         hide           = hide,

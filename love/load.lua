@@ -162,6 +162,7 @@ function love.load()
 
             menu.keypressed(key)
         end,
+        mousepressed = menu.mousepressed,
         update     = function (dt)
             game.update(dt)
             menu.update(dt)

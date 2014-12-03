@@ -415,7 +415,6 @@ function game.update (dt)
 
     if closest_bullet < 1000 then
         bullet_factor = math.max(0.25, 1 - 300/closest_bullet)
-        print(bullet_factor)
     else
         bullet_factor = 1
     end

@@ -35,7 +35,7 @@ hump = {
 
 -- Helper methods
 serialize  = require('vendor/ser')
-inspect    = kikito.inspect
+inspect    = kikito.inspect.inspect
 math.round = require('vendor/nomoon/round')
 --[[ .... ]] require('vendor/deepcopy') -- table.deepcopy
 table.copy = table.deepcopy
