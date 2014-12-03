@@ -28,7 +28,9 @@
   - ships should break into debris but persist (persistence!)
   - ships should lose some velocity (just add the incident velocity as a force: bullets are low mass, rocks large)
 
-+ realistic starfield!
+- realistic starfield!
+  - adapt the nullprogram algorithm
+  - decouple the grid from the stars and the rocks
 
 - level: actually plan out how things are going to go
 - a giant space boss
@@ -95,3 +97,4 @@
 + fix that FUCKING bug with the controls. What even IS that!?
   + push each key event into a buffer and process one key event per button per update
 
+- try going back to nomoon's input events, but with my buffer
