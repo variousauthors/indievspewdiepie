@@ -1,4 +1,3 @@
-local lookUpStars = require('game/starfield')
 
 local function update_velocity (ship, dt, fx, fy)
     fx = fx or 0
@@ -61,18 +60,18 @@ function game.update (dt)
         -- then explode object
 
         -- collide with player
-        do
-            if player.explode == nil then
-                local dx, dy = player.x - rock.sx, player.y - rock.sy
-                local square_distance = math.pow(dx, 2) + math.pow(dy, 2)
+--      do
+--          if player.explode == nil then
+--              local dx, dy = player.x - rock.sx, player.y - rock.sy
+--              local square_distance = math.pow(dx, 2) + math.pow(dy, 2)
 
-                if square_distance < math.pow(rock.r, 2) then
-                    player.explode = 5
-                    love.soundman.run('player_explodes')
-                    table.insert(game.explosions, player)
-                end
-            end
-        end
+--              if square_distance < math.pow(rock.r, 2) then
+--                  player.explode = 5
+--                  love.soundman.run('player_explodes')
+--                  table.insert(game.explosions, player)
+--              end
+--          end
+--      end
 
         -- collide with ships
         -- TODO if the rock has a factory, then it should not collide

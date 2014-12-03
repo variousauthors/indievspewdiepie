@@ -106,8 +106,8 @@ function love.load()
     -- happens once before anything
     game.init()
 
-    love.viewport.setFullscreen()
-    love.viewport.setupScreen()
+--  love.viewport.setFullscreen()
+--  love.viewport.setupScreen()
 
     menu          = Menu()
     settings_menu = SettingsMenu()
@@ -202,7 +202,8 @@ function love.load()
         from      = "start",
         to        = "run",
         condition = function ()
-            return not menu.isShowing() and not game.get("settings")
+            return true
+            -- return not menu.isShowing() and not game.get("settings")
         end
     })
 

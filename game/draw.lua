@@ -6,7 +6,22 @@ local setColor = function (r, g, b)
     love.graphics.setColor(r*ar, g*ag, b*ab)
 end
 
+local lookUpStars = require('game/starfield')
 function game.draw()
+    -- TODO moved this here temporarily
+    -- generate stars and asteroids for the currently active space
+    game.star_layers = {}
+    game.active_asteroids = {}
+    game.active_factories = {}
+
+    -- passing in negative camera offset so that the stars appear
+    -- to travel in the opposite direction to the camera
+--  table.insert(game.star_layers, lookUpStars(- game.camera.x, - game.camera.y, 1))
+--  table.insert(game.star_layers, lookUpStars(- game.camera.x/4, - game.camera.y/4, 3))
+--  table.insert(game.star_layers, lookUpStars(- game.camera.x/8, - game.camera.y/8, 9))
+    table.insert(game.star_layers, lookUpStars(- game.camera.x, -game.camera.y, 9, true))
+    table.insert(game.star_layers, lookUpStars(0, 0, 9, false))
+
     local player = game.player
 
     -- get the ambient offset from full colour
