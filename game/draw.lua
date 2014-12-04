@@ -19,8 +19,6 @@ function game.draw()
 --  table.insert(game.star_layers, lookUpStars(- game.camera.x, - game.camera.y, 1))
 --  table.insert(game.star_layers, lookUpStars(- game.camera.x/4, - game.camera.y/4, 3))
 --  table.insert(game.star_layers, lookUpStars(- game.camera.x/8, - game.camera.y/8, 9))
-    table.insert(game.star_layers, lookUpStars(- game.camera.x, -game.camera.y, 9, true))
-    table.insert(game.star_layers, lookUpStars(0, 0, 9, false))
 
     local player = game.player
 

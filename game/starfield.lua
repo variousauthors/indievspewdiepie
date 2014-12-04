@@ -1,3 +1,21 @@
+-- there is a coordinate system in x and y, the grid
+-- the origin of that system, (0, 0) is the player's starting position
+--
+-- there is a second coordinate system, the canvas
+-- the origin of that system is also the player's starting position
+-- (this is a convenience, but it also causes confusion: the player does not exist in the canvas space)
+-- however, the canvas space is clamped while the grid is not
+-- as a result of being clamped, the canvas has a center: (w/2, h/2) where w and h are the viewport w and h
+--
+-- when a player moves to a coordinate in the grid that is not in the canvas
+-- then the player's position is outside the Domain of the canvas, and the player cannot be drawn
+-- to counter this, we maintain the player's offset from the canvas center
+-- this offset is the camera
+-- when drawing, we translate the canvas coordinate space by this offset, so that everything
+-- within w/2, h/2 of the player is drawn on the screen
+-- (this is the equivalent of adjusting the individual positions of each object on the grid)
+
+
 local STAR_SEED = 0x9d2c5680;
 local STAR_TILE_SIZE = 256;
 local rshift, lshift, arshift, bxor, tohex = bit.rshift, bit.lshift, bit.arshift, bit.bxor, bit.tohex
@@ -157,6 +175,44 @@ local function mix (a, b, c)
     return c
 end
 
+-- maybe run all the callbacks for each lookup,
+-- rather than looking up the same stuff more than once
+-- this is already over-thinking it
+function grid(px, py, scale, callback)
+    local w, h = love.viewport.getWidth(), love.viewport.getHeight()
+
+    -- the address in pixels of the top-left corner of the camera, relative to the grid
+    -- scaled to give us a larger or smaller chunk of space centered on the player
+    local cx, cy = game.camera.x * scale, game.canvas.y * scale
+
+    -- the pixel coord needs to be divided by the tile size, to give us the lattice-point
+    -- rounded away from zero, so that we always have "too many" tiles
+    local tx, ty = math.round(cx / STAR_TILE_SIZE, 0, 'HALFAWAY'), math.round(cy / STAR_TILE_SIZE, 0, 'HALFAWAY')
+
+    -- we want the chunk to load as many tiles as in necessary to fill the viewport, and then one more
+    local lw, lh = math.ceil(w / STAR_TILE_SIZE) + 1, math.ceil(h / STAR_TILE_SIZE) + 1
+
+    for i = tx, tx + lw do
+        for j = ty, ty + ly do
+            local hash = mix(STAR_SEED, i, j)
+
+            callback(i, j, hash)
+        end
+    end
+
+
+    -- the player's position, offset by w/2 h/2 gives us the top corner of the "camera"
+    -- as a position in the grid.
+    -- the nearest lattice point to this position, towards the top left, is the top-left-most cell we need
+    --
+    -- if the scale is smaller, we will need more squares, but also different squares: the top-left
+    -- corner should be offset by a coresponding scale
+    --
+
+    -- the actual size of the grid cells is irrelevant at this point: it will be used for creating stars
+    -- with the hashes
+end
+
 local strip_stagger = 500
 local function lookUpStars (xoff, yoff, starscale)
     local size = STAR_TILE_SIZE / starscale
@@ -176,8 +232,9 @@ local function lookUpStars (xoff, yoff, starscale)
             local ii, jj = math.floor(i / size), math.floor(j / size)
             local hash = mix(STAR_SEED, ii, jj)
 
-            restoreStars(hash, size, xoff, yoff, x_lerp, y_lerp, i, j, populate, stars)
---          local populate = populationMethod(starscale, ii, jj)
+            love.graphics.setColor(255, 0, 0)
+            love.graphics.rectangle("line", i, j, size, size)
+            love.graphics.setColor(255, 255, 255)
 
 --          if populate == 1 then
 --              restoreStars(hash, size, xoff, yoff, x_lerp, y_lerp, i, j, populate, stars)
