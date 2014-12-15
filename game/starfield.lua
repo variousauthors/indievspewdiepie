@@ -175,42 +175,25 @@ local function mix (a, b, c)
     return c
 end
 
--- maybe run all the callbacks for each lookup,
--- rather than looking up the same stuff more than once
--- this is already over-thinking it
-function grid(px, py, scale, callback)
-    local w, h = love.viewport.getWidth(), love.viewport.getHeight()
+-- calculates the width of a square of tiles, centered on the given point
+-- where the tiles are scaled
+function scaledGrid(x, y, scale, callback)
+    local tile_size = STAR_TILE_SIZE / scale
 
-    -- the address in pixels of the top-left corner of the camera, relative to the grid
-    -- scaled to give us a larger or smaller chunk of space centered on the player
-    local cx, cy = game.camera.x * scale, game.canvas.y * scale
+    -- the number of tiles across the screen from the center
+    local w, h = love.viewport.getWidth() / 2, love.viewport.getHeight() / 2
+    local rx, ry = math.ceil(w / tile_size), math.ceil(h / tile_size)
 
-    -- the pixel coord needs to be divided by the tile size, to give us the lattice-point
-    -- rounded away from zero, so that we always have "too many" tiles
-    local tx, ty = math.round(cx / STAR_TILE_SIZE, 0, 'HALFAWAY'), math.round(cy / STAR_TILE_SIZE, 0, 'HALFAWAY')
+    -- the center lattice point's top left corner
+    local cx, cy = math.floor(x / tile_size), math.floor(y / tile_size)
 
-    -- we want the chunk to load as many tiles as in necessary to fill the viewport, and then one more
-    local lw, lh = math.ceil(w / STAR_TILE_SIZE) + 1, math.ceil(h / STAR_TILE_SIZE) + 1
-
-    for i = tx, tx + lw do
-        for j = ty, ty + ly do
+    for i = cx - rx, cx + rx do
+        for j = cy - ry, cy + ry do
             local hash = mix(STAR_SEED, i, j)
 
-            callback(i, j, hash)
+            callback(i, j, tile_size, hash)
         end
     end
-
-
-    -- the player's position, offset by w/2 h/2 gives us the top corner of the "camera"
-    -- as a position in the grid.
-    -- the nearest lattice point to this position, towards the top left, is the top-left-most cell we need
-    --
-    -- if the scale is smaller, we will need more squares, but also different squares: the top-left
-    -- corner should be offset by a coresponding scale
-    --
-
-    -- the actual size of the grid cells is irrelevant at this point: it will be used for creating stars
-    -- with the hashes
 end
 
 local strip_stagger = 500

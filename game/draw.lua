@@ -2,6 +2,14 @@ love.viewport = require('libs/viewport').newSingleton()
 
 local ar, ag, ab
 
+-- TODO these shouldn't be here, but should be exposed by the grid maybe?
+-- like, the draw logic for objects should say "give me an int" and the
+-- grid should figure out the rest. Like, the grid exposes a function
+-- like "next" and in each iteration of the grid tile loop it updates
+-- its internal "current hash" property, so next() is always the next
+-- int in the current tile
+local rshift, lshift, arshift, bxor, tohex = bit.rshift, bit.lshift, bit.arshift, bit.bxor, bit.tohex
+
 local setColor = function (r, g, b)
     love.graphics.setColor(r*ar, g*ag, b*ab)
 end
@@ -65,6 +73,37 @@ function game.draw()
     -- translate everything so the camera is centered on the player
     love.graphics.push()
     love.graphics.translate(game.camera.x, game.camera.y)
+
+    scaledGrid(player.x, player.y, 1, function (x, y, size, hash)
+        local px = (hash % size) + (x * size);
+        hash = rshift(hash, 3)
+
+        local py = (hash % size) + (y * size);
+        hash = rshift(hash, 3)
+
+--      table.insert(stars, {
+--          x = px,
+--          y = py
+--      })
+
+        love.graphics.point(px, py)
+
+    end)
+
+    scaledGrid(player.x, player.y, 8, function (x, y, size, hash)
+        local px = (hash % size) + (x * size);
+        hash = rshift(hash, 3)
+
+        local py = (hash % size) + (y * size);
+        hash = rshift(hash, 3)
+
+--      table.insert(stars, {
+--          x = px,
+--          y = py
+--      })
+
+        love.graphics.point(px, py)
+    end)
 
     -- draw the player
     do
