@@ -29,7 +29,7 @@
   - ships should lose some velocity (just add the incident velocity as a force: bullets are low mass, rocks large)
 
 - realistic starfield!
-  - adapt the nullprogram algorithm
+  + adapt the nullprogram algorithm
   - decouple the grid from the stars and the rocks
 
 - level: actually plan out how things are going to go
@@ -45,7 +45,6 @@
   - the camera should probably rotate so that you are always facing forward?
 - better, more accurate enemies
 - variety of enemies
-``
 - asteroid belts
   + placed like stars, but in belts
   + irregular polygons
@@ -72,7 +71,7 @@
 - forecast the physics and draw a dotted line in the direction a thing
   is going, but also remember where the thing came from and draw that
   dotted line too.
-  - limit the length to N steps, and the dost should not move relative
+  - limit the length to N steps, and the dots should not move relative
     to the background
   - the object should move along this line like a train along a rail, but
     also the line is dissapearing behind and appearing in front.
@@ -91,7 +90,7 @@
   + times score multiplier
 
 + bullet time
-  - "shift" into bullet time?
+  - "shift" into bullet time? (by holding shift)
   + auto bullet time when bullets are near?
 
 + fix that FUCKING bug with the controls. What even IS that!?

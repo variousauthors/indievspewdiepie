@@ -20,6 +20,7 @@ local STAR_SEED = 0x9d2c5680;
 local STAR_TILE_SIZE = 256;
 local rshift, lshift, arshift, bxor, tohex = bit.rshift, bit.lshift, bit.arshift, bit.bxor, bit.tohex
 
+-- TODO this is currently not being used
 local function populationMethod (starscale, ii, jj)
     local method = 1
 
@@ -179,6 +180,7 @@ end
 -- where the tiles are scaled
 function scaledGrid(x, y, scale, callback)
     local tile_size = STAR_TILE_SIZE / scale
+    local x, y = x, y
 
     -- the number of tiles across the screen from the center
     local w, h = love.viewport.getWidth() / 2, love.viewport.getHeight() / 2
