@@ -39,7 +39,8 @@ function love.load()
     love.mouse.setVisible(false)
     love.mouse.setGrabbed(true)
 
-    local some_max = 500
+    -- set the player's top speed
+    local top_speed = 500
 
     -- global variables for integration with dp menus
     W_HEIGHT = love.viewport.getHeight()
@@ -50,7 +51,12 @@ function love.load()
 
     function game.init ()
         -- create game objects
-        game.player = Ship(0, 0, 2, 5, some_max)
+        game.player = Ship(0, 0, 2, 5, top_speed)
+
+        -- enable the movement and guns
+        game.player.movement_enabled = false
+        game.player.violence_enabled = false
+
         game.player.input = {
             up = {},
             down = {},
@@ -228,6 +234,7 @@ function love.load()
         from      = "run",
         to        = "win",
         condition = function ()
+            -- when the explosion animation for the player is over
             return game.player.explode == 0
         end
     })

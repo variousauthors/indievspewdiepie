@@ -457,7 +457,7 @@ function game.update (dt)
             time_since_fired = time_since_fired + dt*multiplier_acquisition_rate
 
             if player.charge > 1 then
-                if player.gun == true then
+                if player.gun == true and player.violence_enabled == true then
                     love.soundman.run('player_laser')
                     time_since_fired = 0
 
@@ -479,8 +479,10 @@ function game.update (dt)
             end
         end
 
-        update_velocity(player, dt, fx, fy)
-        update_position(player, dt)
+        if player.enabled == true then
+            update_velocity(player, dt, fx, fy)
+            update_position(player, dt)
+        end
     end
 
     -- calculate the score multiplier
