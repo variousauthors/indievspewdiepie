@@ -30,6 +30,7 @@ function love.load()
     require('libs/fsm')
     require('game/update')
     require('game/draw')
+    require('game/player')
 
     Component = require('libs/component')
 
@@ -52,10 +53,6 @@ function love.load()
     function game.init ()
         -- create game objects
         game.player = Ship(0, 0, 2, 5, top_speed)
-
-        -- enable the movement and guns
-        game.player.movement_enabled = false
-        game.player.violence_enabled = false
 
         game.player.input = {
             up = {},

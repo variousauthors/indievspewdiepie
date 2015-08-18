@@ -223,8 +223,7 @@ local bullet_factor = 1
 
 function game.update (dt)
     local player = game.player
-    local active_ship_count = 0
-    local time_since_fired = game.time_since_fired
+    game.active_ship_count = 0
 
     if player.explode == nil then
         dt = dt * bullet_factor
@@ -302,13 +301,13 @@ function game.update (dt)
     -- update velocity, collide with player, TODO collide with rocks
 
     -- active_ship_count used to calculate score multiplier
-    active_ship_count = 0
+    game.active_ship_count = 0
 
     for i, ship in pairs(game.ships) do
         local fx, fy = 0, 0
 
         if ship.explode == nil then
-            active_ship_count = active_ship_count + 1
+            game.active_ship_count = game.active_ship_count + 1
             -- explode the player if the ship has collided
             local dx, dy = ship.x - player.x, ship.y - player.y
             local square_distance = math.pow(dx, 2) + math.pow(dy, 2)
@@ -423,85 +422,24 @@ function game.update (dt)
     -- calculate control forces
     -- TODO collide with rocks
     do
-        local fx, fy = 0, 0
-
-        if player.explode == nil then
-            -- process an input from the buffer
-            if #(player.input.up) > 0 then player.up = table.remove(player.input.up, 1) end
-            if #(player.input.down) > 0 then player.down = table.remove(player.input.down, 1) end
-            if #(player.input.left) > 0 then player.left = table.remove(player.input.left, 1) end
-            if #(player.input.right) > 0 then player.right = table.remove(player.input.right, 1) end
-            if #(player.input.gun) > 0 then player.gun = table.remove(player.input.gun, 1) end
-
-            if player.up == true then fy = fy - 1000 end
-            if player.down == true then fy = fy + 1000 end
-            if player.left == true then fx = fx - 1000 end
-            if player.right == true then fx = fx + 1000 end
-
-            -- update the reticle
-            local mx, my = love.mouse.getPosition()
-            local h = love.viewport.getHeight()/2
-            local w = love.viewport.getWidth()/2
-
-            local rx, ry = mx - w, my - h
-            local theta = math.atan2(ry, rx)
-
-            player.reticle.theta = theta
-            player.reticle.rx = 100*math.cos(theta) + w
-            player.reticle.ry = 100*math.sin(theta) + h
-
-            player.charge = math.min(1.5, player.charge + dt)
-
-            -- used to calculate score multiplier
-            multiplier_acquisition_rate = math.pow(active_ship_count, 1.5)
-            time_since_fired = time_since_fired + dt*multiplier_acquisition_rate
-
-            if player.charge > 1 then
-                if player.gun == true and player.violence_enabled == true then
-                    love.soundman.run('player_laser')
-                    time_since_fired = 0
-
-                    player.gun = false
-                    local bullet = {
-                        x = player.x, y = player.y, speed = 200, r = 3
-                    }
-
-                    local theta = player.reticle.theta
-                    local mag = bullet.speed
-
-                    bullet.vx = mag*math.cos(theta) + player.vx
-                    bullet.vy = mag*math.sin(theta) + player.vy
-
-                    table.insert(game.player_bullets, bullet)
-
-                    player.charge = player.charge - 1/3
-                end
-            end
-        end
-
-        if player.enabled == true then
-            update_velocity(player, dt, fx, fy)
-            update_position(player, dt)
-        end
+        player_update(player, dt);
     end
 
     -- calculate the score multiplier
     do
         -- if you've dodged long enough, multiplier goes up
-        if time_since_fired > game.next_multiplier_at() then
+        if game.time_since_fired > game.next_multiplier_at() then
             game.score_multiplier = game.score_multiplier + 1
 
-            time_since_fired = 0
+            game.time_since_fired = 0
         end
 
         -- if you've killed them all, then reset multiplier?
         -- TODO I'm not sure if this is more fun...
-        if active_ship_count == 0 then
+        if game.active_ship_count == 0 then
             game.score_multiplier = 1
         end
 
-        -- for draw routine
-        game.time_since_fired = time_since_fired
     end
 
     -- player bullet update
