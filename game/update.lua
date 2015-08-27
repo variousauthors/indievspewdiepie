@@ -25,6 +25,19 @@ function clear_rows (y)
         for i = 1, game.width, 1 do
             game.board[y][i] = false
         end
+
+        -- move things down
+        for yy = y, 1, -1 do
+            for xx = 1, game.width, 1 do
+            print(yy, xx)
+                if (game.board[yy][xx] == true) then
+                    -- move row down
+                    local pip = game.board[yy][xx]
+                    game.board[yy][xx] = false
+                    game.board[yy + 1][xx] = true
+                end
+            end
+        end
     end
 end
 
