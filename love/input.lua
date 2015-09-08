@@ -32,6 +32,7 @@ function love.keypressed(key)
 
     -- player inputpressed
     if game.player.input[key] ~= nil then
+        game.player.has_input = true
         table.insert(game.player.input[key], true)
     end
 
@@ -48,15 +49,6 @@ end
 
 function love.keyreleased(key)
 
-    if key == "d" then key = "right" end
-    if key == "w" then key = "up" end
-    if key == "s" then key = "down" end
-    if key == "a" then key = "left" end
-
-    -- player inputpressed
-    if game.player.input[key] ~= nil then
-        table.insert(game.player.input[key], false)
-    end
 end
 
 function love.mousepressed (x, y, button)

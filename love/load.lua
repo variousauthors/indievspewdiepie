@@ -53,19 +53,27 @@ function love.load()
 
     game = {}
     game.player = {}
+    game.player.has_input = false
     game.player.input = {
         up = {},
         down = {},
         left = {},
         right = {}
     }
+    game.colors = {
+        red = { 200, 55, 55 },
+        green = { 55, 200, 55 },
+        blue = { 55, 55, 200 }
+    }
 
     game.scale = 10
     game.height = 20
     game.width = 10
     game.board = init_board()
-    game.time = 0
-    game.step = 0.1
+    game.update_timer = 0
+    game.input_timer = 4
+    game.rate = 10
+    game.step = 0.1 * game.rate
     game.input_rate = 4
 
 end

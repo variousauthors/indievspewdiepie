@@ -29,7 +29,6 @@ function clear_rows (y)
         -- move things down
         for yy = y, 1, -1 do
             for xx = 1, game.width, 1 do
-            print(yy, xx)
                 if (game.board[yy][xx] == true) then
                     -- move row down
                     local pip = game.board[yy][xx]
@@ -73,8 +72,13 @@ function step_pip (pip)
 end
 
 function next_pip ()
+    local index = math.random(1, 3)
+
     return {
-        x = game.width/2, y = 1, dim = game.scale
+        x = game.width/2,
+        y = 1,
+        dim = game.scale,
+        color = game.colors[index]
     }
 end
 
@@ -82,41 +86,57 @@ function love.update (dt)
     local player = game.player
     local direction = 0
 
-    game.time = game.time + dt
+    game.update_timer = game.update_timer + dt
+    game.input_timer = game.input_timer + dt
 
     -- there should be a pip
     if (game.pip == nil) then
         game.pip = next_pip()
     end
 
-    -- process input 4 times per step
-    if (game.time > game.step/game.input_rate) then
+    -- process one set of inputs then cooldown
+    if (game.input_timer < game.step/game.input_rate) then
+        game.player.has_input = false
+        player.input.up = {}
+        player.input.left = {}
+        player.input.right = {}
+
+        -- ignore
+    elseif (game.player.has_input) then
+        game.player.has_input = false
+        game.input_timer = 0
 
         -- consume an input from the buffer
         if #(player.input.left) > 0 then player.left = table.remove(player.input.left, 1) end
         if #(player.input.right) > 0 then player.right = table.remove(player.input.right, 1) end
+        if #(player.input.up) > 0 then player.up = table.remove(player.input.up, 1) end
 
         if (player.left) then direction = -1 end
         if (player.right) then direction = 1 end
 
-        move_pip(game.pip, direction)
+        if (player.up) then
+            drop_pip(game.pip)
 
-        player.up = false
+            -- reset the game timer
+            game.update_timer = 0
+        else
+            move_pip(game.pip, direction)
+        end
+
         player.left = false
         player.right = false
+        player.up = false
+
+        player.input.up = {}
+        player.input.left = {}
+        player.input.right = {}
     end
 
     -- move the piece down every step
-    if (game.time > game.step) then
-        game.time = 0
+    if (game.update_timer > game.step) then
+        game.update_timer = 0
 
-        if #(player.input.up) > 0 then player.up = table.remove(player.input.up, 1) end
-
-        if (not player.up) then
-            step_pip(game.pip)
-        else
-            drop_pip(game.pip)
-        end
-
+        step_pip(game.pip)
     end
+
 end
