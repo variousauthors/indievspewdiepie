@@ -41,26 +41,32 @@ function clear_rows (y)
     end
 end
 
-function update_pip (pip, direction)
+-- move the pip side to side
+function move_pip (pip, direction)
+    local x = pip.x + direction
+
+    -- clamp the move
+    x = math.max(math.min(game.width, x), 0)
+
+    -- if the pip would move and the board contains the target space
+    -- TODO this appears to be wrong since game.board[x] should be game.board[y][x]
+    if (x ~= pip.x and game.board[x]) then
+
+        -- check for collision
+        if not (game.board[pip.y][x] == true) then
+            pip.x = x
+        end
+    end
+end
+
+-- move the pip down one row
+function step_pip (pip)
     -- check for a pip in the next square
     if (pip.y + 1 > game.height or game.board[pip.y + 1][pip.x] == true) then
         -- remove the pip and add to the board
         game.pip = nil
         game.board[pip.y][pip.x] = true
         clear_rows(pip.y)
-    end
-
-    if (direction ~= 0) then
-        local p = pip.x + direction
-
-        -- check for out of bounds
-        p = math.max(math.min(game.width, p), 0)
-
-        if (p ~= pip.x and game.board[p]) then
-            if not (game.board[pip.y][p] == true) then
-                pip.x = p
-            end
-        end
     end
 
     pip.y = math.min(game.height, pip.y + 1)
@@ -73,40 +79,44 @@ function next_pip ()
 end
 
 function love.update (dt)
+    local player = game.player
+    local direction = 0
+
     game.time = game.time + dt
 
+    -- there should be a pip
+    if (game.pip == nil) then
+        game.pip = next_pip()
+    end
+
+    -- process input 4 times per step
+    if (game.time > game.step/game.input_rate) then
+
+        -- consume an input from the buffer
+        if #(player.input.left) > 0 then player.left = table.remove(player.input.left, 1) end
+        if #(player.input.right) > 0 then player.right = table.remove(player.input.right, 1) end
+
+        if (player.left) then direction = -1 end
+        if (player.right) then direction = 1 end
+
+        move_pip(game.pip, direction)
+
+        player.up = false
+        player.left = false
+        player.right = false
+    end
+
+    -- move the piece down every step
     if (game.time > game.step) then
         game.time = 0
-        --if there is no pip make a pip
-        --if there is a pip update it
 
-        if (game.pip == nil) then
-            game.pip = next_pip()
+        if #(player.input.up) > 0 then player.up = table.remove(player.input.up, 1) end
+
+        if (not player.up) then
+            step_pip(game.pip)
         else
-            local player = game.player
-            local direction = 0
-
-            -- process an input from the buffer
-            if #(player.input.up) > 0 then player.up = table.remove(player.input.up, 1) end
-            if #(player.input.left) > 0 then player.left = table.remove(player.input.left, 1) end
-            if #(player.input.right) > 0 then player.right = table.remove(player.input.right, 1) end
-
-            if (player.left) then direction = -1 end
-            if (player.right) then direction = 1 end
-
-            if (not player.up) then
-                update_pip(game.pip, direction)
-            else
-                drop_pip(game.pip)
-            end
-
-            player.up = false
-            player.left = false
-            player.right = false
-
-            player.input.up = {}
-            player.input.left = {}
-            player.input.right = {}
+            drop_pip(game.pip)
         end
+
     end
 end

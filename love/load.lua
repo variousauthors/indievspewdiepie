@@ -66,5 +66,6 @@ function love.load()
     game.board = init_board()
     game.time = 0
     game.step = 0.1
+    game.input_rate = 4
 
 end
