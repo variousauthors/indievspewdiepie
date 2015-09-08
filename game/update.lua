@@ -9,35 +9,67 @@ function drop_pip (pip)
 
     game.pip = nil
     game.board[pip.y][pip.x] = pip
-    clear_rows(pip.y)
+    clear_pips(pip)
 end
 
-function clear_rows (y)
+function clear_pips (pip)
+    local y = pip.y
     local pips = 0
+    local Q = {}
+    local marked = {}
+    local index = 1
+    local color = pip.color
 
-    for i = 1, game.width, 1 do
-        if (game.board[y][i]) then
-            pips = pips + 1
-        end
-    end
+    table.insert(Q, pip)
 
-    if (pips == game.width) then
-        for i = 1, game.width, 1 do
-            game.board[y][i] = false
-        end
+    while (#(Q) > 0) do
+        local curr = table.remove(Q, 1)
+        curr.marked = true
+        table.insert(marked, curr)
 
-        -- move things down
-        for yy = y, 1, -1 do
-            for xx = 1, game.width, 1 do
-                if (game.board[yy][xx] ~= false) then
-                    -- move row down
-                    local pip = game.board[yy][xx]
-                    game.board[yy][xx] = false
-                    game.board[yy + 1][xx] = pip
+        for i, v in ipairs({ 1, -1 }) do
+            if (game.board[curr.y][curr.x + v]) then
+                local adj = game.board[curr.y][curr.x + v]
+
+                if (not adj.marked and adj.color == pip.color) then
+                    adj.marked = true
+                    table.insert(Q, adj)
+                end
+            end
+
+            if (game.board[curr.y + v] and game.board[curr.y + v][curr.x]) then
+                local adj = game.board[curr.y + v][curr.x]
+
+                if (not adj.marked and adj.color == pip.color) then
+                    adj.marked = true
+                    table.insert(Q, adj)
                 end
             end
         end
     end
+
+    -- if we have at least 3 pips marked for removal,
+    -- remove all marked pips
+    for i,v in ipairs(marked) do
+        v.marked = false
+
+        if (#(marked) >= game.match_target) then
+            game.board[v.y][v.x] = false
+
+--          -- move things down
+--          for yy = y, 1, -1 do
+--              for xx = 1, game.width, 1 do
+--                  if (game.board[yy][xx] ~= false) then
+--                      -- move row down
+--                      local pip = game.board[yy][xx]
+--                      game.board[yy][xx] = false
+--                      game.board[yy + 1][xx] = pip
+--                  end
+--              end
+--          end
+        end
+    end
+
 end
 
 -- move the pip side to side
@@ -65,7 +97,7 @@ function step_pip (pip)
         -- remove the pip and add to the board
         game.pip = nil
         game.board[pip.y][pip.x] = pip
-        clear_rows(pip.y)
+        clear_pips(pip)
     end
 
     pip.y = math.min(game.height, pip.y + 1)
@@ -78,7 +110,8 @@ function next_pip ()
         x = game.width/2,
         y = 1,
         dim = game.scale,
-        color = game.colors[index]
+        color = game.colors[index],
+        marked = false
     }
 end
 
