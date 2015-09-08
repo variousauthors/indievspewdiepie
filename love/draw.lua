@@ -4,7 +4,9 @@
 love.viewport = require('libs/viewport').newSingleton()
 
 function draw_pip (pip)
+    love.graphics.setColor(pip.color)
     love.graphics.rectangle('fill', pip.x * game.scale, pip.y * game.scale, pip.dim, pip.dim)
+    love.graphics.setColor(game.colors.white)
 end
 
 function draw_board ()
@@ -12,8 +14,11 @@ function draw_board ()
 
     for y = 1, #(game.board) do
         for x = 1, #(game.board[y]) do
-            if (game.board[y][x] == true) then
+            if (game.board[y][x] ~= false) then
+                -- set the color to the pip's color
+                love.graphics.setColor(game.board[y][x].color)
                 love.graphics.rectangle('fill', x * game.scale, y * game.scale, game.scale, game.scale)
+                love.graphics.setColor(game.colors.white)
             end
         end
     end

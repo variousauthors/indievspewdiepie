@@ -2,13 +2,13 @@ function drop_pip (pip)
     local x, y = pip.x, pip.y + 1
 
     -- iterate over the current column from the pip
-    while (y <= game.height and game.board[y][x] ~= true) do
+    while (y <= game.height and game.board[y][x] == false) do
         pip.y = y
         y = y + 1
     end
 
     game.pip = nil
-    game.board[pip.y][pip.x] = true
+    game.board[pip.y][pip.x] = pip
     clear_rows(pip.y)
 end
 
@@ -29,11 +29,11 @@ function clear_rows (y)
         -- move things down
         for yy = y, 1, -1 do
             for xx = 1, game.width, 1 do
-                if (game.board[yy][xx] == true) then
+                if (game.board[yy][xx] ~= false) then
                     -- move row down
                     local pip = game.board[yy][xx]
                     game.board[yy][xx] = false
-                    game.board[yy + 1][xx] = true
+                    game.board[yy + 1][xx] = pip
                 end
             end
         end
@@ -52,7 +52,7 @@ function move_pip (pip, direction)
     if (x ~= pip.x and game.board[x]) then
 
         -- check for collision
-        if not (game.board[pip.y][x] == true) then
+        if not (game.board[pip.y][x] ~= false) then
             pip.x = x
         end
     end
@@ -61,10 +61,10 @@ end
 -- move the pip down one row
 function step_pip (pip)
     -- check for a pip in the next square
-    if (pip.y + 1 > game.height or game.board[pip.y + 1][pip.x] == true) then
+    if (pip.y + 1 > game.height or game.board[pip.y + 1][pip.x] ~= false) then
         -- remove the pip and add to the board
         game.pip = nil
-        game.board[pip.y][pip.x] = true
+        game.board[pip.y][pip.x] = pip
         clear_rows(pip.y)
     end
 

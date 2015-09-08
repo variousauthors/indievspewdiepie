@@ -61,9 +61,10 @@ function love.load()
         right = {}
     }
     game.colors = {
-        red = { 200, 55, 55 },
-        green = { 55, 200, 55 },
-        blue = { 55, 55, 200 }
+        { 200, 55, 55 }, -- red
+        { 55, 200, 55 }, -- green
+        { 55, 55, 200 }, -- blue
+        white = { 200, 200, 200 }
     }
 
     game.scale = 10
@@ -72,7 +73,7 @@ function love.load()
     game.board = init_board()
     game.update_timer = 0
     game.input_timer = 4
-    game.rate = 10
+    game.rate = 1
     game.step = 0.1 * game.rate
     game.input_rate = 4
 
