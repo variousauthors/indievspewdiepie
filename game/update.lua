@@ -97,11 +97,20 @@ function love.update (dt)
     -- process one set of inputs then cooldown
     if (game.input_timer < game.step/game.input_rate) then
         game.player.has_input = false
-        player.input.up = {}
         player.input.left = {}
         player.input.right = {}
 
-        -- ignore
+        if #(player.input.up) > 0 then player.up = table.remove(player.input.up, 1) end
+
+        if (player.up) then
+            drop_pip(game.pip)
+            game.update_timer = 0
+        end
+
+        player.up = false
+
+        player.input.up = {}
+
     elseif (game.player.has_input) then
         game.player.has_input = false
         game.input_timer = 0
@@ -109,25 +118,14 @@ function love.update (dt)
         -- consume an input from the buffer
         if #(player.input.left) > 0 then player.left = table.remove(player.input.left, 1) end
         if #(player.input.right) > 0 then player.right = table.remove(player.input.right, 1) end
-        if #(player.input.up) > 0 then player.up = table.remove(player.input.up, 1) end
 
         if (player.left) then direction = -1 end
         if (player.right) then direction = 1 end
 
-        if (player.up) then
-            drop_pip(game.pip)
-
-            -- reset the game timer
-            game.update_timer = 0
-        else
-            move_pip(game.pip, direction)
-        end
+        move_pip(game.pip, direction)
 
         player.left = false
         player.right = false
-        player.up = false
-
-        player.input.up = {}
         player.input.left = {}
         player.input.right = {}
     end
@@ -135,7 +133,6 @@ function love.update (dt)
     -- move the piece down every step
     if (game.update_timer > game.step) then
         game.update_timer = 0
-
         step_pip(game.pip)
     end
 
