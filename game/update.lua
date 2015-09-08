@@ -20,12 +20,12 @@ function clear_pips (pip)
     local index = 1
     local color = pip.color
 
+    pip.marked = true
+    table.insert(marked, pip)
     table.insert(Q, pip)
 
     while (#(Q) > 0) do
         local curr = table.remove(Q, 1)
-        curr.marked = true
-        table.insert(marked, curr)
 
         for i, v in ipairs({ 1, -1 }) do
             if (game.board[curr.y][curr.x + v]) then
@@ -34,6 +34,7 @@ function clear_pips (pip)
                 if (not adj.marked and adj.color == pip.color) then
                     adj.marked = true
                     table.insert(Q, adj)
+                    table.insert(marked, adj)
                 end
             end
 
@@ -43,6 +44,7 @@ function clear_pips (pip)
                 if (not adj.marked and adj.color == pip.color) then
                     adj.marked = true
                     table.insert(Q, adj)
+                    table.insert(marked, adj)
                 end
             end
         end
@@ -98,9 +100,9 @@ function step_pip (pip)
         game.pip = nil
         game.board[pip.y][pip.x] = pip
         clear_pips(pip)
+    else
+        pip.y = math.min(game.height, pip.y + 1)
     end
-
-    pip.y = math.min(game.height, pip.y + 1)
 end
 
 function next_pip ()
@@ -133,17 +135,6 @@ function love.update (dt)
         player.input.left = {}
         player.input.right = {}
 
-        if #(player.input.up) > 0 then player.up = table.remove(player.input.up, 1) end
-
-        if (player.up) then
-            drop_pip(game.pip)
-            game.update_timer = 0
-        end
-
-        player.up = false
-
-        player.input.up = {}
-
     elseif (game.player.has_input) then
         game.player.has_input = false
         game.input_timer = 0
@@ -161,6 +152,18 @@ function love.update (dt)
         player.right = false
         player.input.left = {}
         player.input.right = {}
+    else
+        if #(player.input.up) > 0 then player.up = table.remove(player.input.up, 1) end
+
+        if (player.up) then
+            drop_pip(game.pip)
+            game.update_timer = 0
+        end
+
+        player.up = false
+
+        player.input.up = {}
+
     end
 
     -- move the piece down every step

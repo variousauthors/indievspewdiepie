@@ -76,6 +76,6 @@ function love.load()
     game.input_timer = 4
     game.rate = 1
     game.step = 0.1 * game.rate
-    game.input_rate = 4
+    game.input_rate = 8
 
 end
